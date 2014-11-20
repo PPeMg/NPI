@@ -22,3 +22,15 @@ C:\Users\PPeMg\Documents\Visual Studio 2010\Projects\NPI\ColorBasics-WPF\bin\Deb
 C:\Users\PPeMg\Documents\Visual Studio 2010\Projects\NPI\ColorBasics-WPF\obj\Debug\Microsoft.Samples.Kinect.ColorBasics.Properties.Resources.resources
 C:\Users\PPeMg\Documents\Visual Studio 2010\Projects\NPI\ColorBasics-WPF\obj\Debug\ColorBasics-WPF.exe
 C:\Users\PPeMg\Documents\Visual Studio 2010\Projects\NPI\ColorBasics-WPF\obj\Debug\ColorBasics-WPF.pdb
+D:\GitHub Workspace\NPI\Pruebas\obj\Debug\ColorBasics-WPF.exe
+D:\GitHub Workspace\NPI\Pruebas\obj\Debug\ColorBasics-WPF.pdb
+D:\GitHub Workspace\NPI\Pruebas\bin\Debug\ColorBasics-WPF.exe
+D:\GitHub Workspace\NPI\Pruebas\bin\Debug\ColorBasics-WPF.pdb
+D:\GitHub Workspace\NPI\Pruebas\obj\Debug\ColorBasics-WPF.csprojResolveAssemblyReference.cache
+D:\GitHub Workspace\NPI\Pruebas\obj\Debug\MainWindow.baml
+D:\GitHub Workspace\NPI\Pruebas\obj\Debug\MainWindow.g.cs
+D:\GitHub Workspace\NPI\Pruebas\obj\Debug\App.g.cs
+D:\GitHub Workspace\NPI\Pruebas\obj\Debug\ColorBasics-WPF_MarkupCompile.cache
+D:\GitHub Workspace\NPI\Pruebas\obj\Debug\ColorBasics-WPF.g.resources
+D:\GitHub Workspace\NPI\Pruebas\obj\Debug\Microsoft.Samples.Kinect.ColorBasics.Properties.Resources.resources
+D:\GitHub Workspace\NPI\Pruebas\obj\Debug\ColorBasics-WPF.csproj.GenerateResource.Cache
