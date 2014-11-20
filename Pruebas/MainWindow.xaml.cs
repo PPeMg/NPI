@@ -219,19 +219,57 @@
                 }
 
                 // Si hay algún esqueleto recibido:
-                if (esqueletos.Length != 0)
+                if (esqueletos != null)
                 {
                     // Para cada esqueleto
-                    foreach(Skeleton esq in esqueletos)
+                    foreach (Skeleton esq in esqueletos)
                     {
                         // Si todo el esqueleto está siendo detectado (TRACKED)
                         if (esq.TrackingState == SkeletonTrackingState.Tracked)
                         {
+                            Joint cabeza = esq.Joints[JointType.Head];
+                            Joint cuello = esq.Joints[JointType.ShoulderCenter];
+                            pintarHueso(cabeza, cuello, Colors.Aqua);
 
+                            foreach (Joint art in esq.Joints)
+                            {
+                                ColorImagePoint punto = new ColorImagePoint();
+                                pintarArticulacion(art, ref punto, Colors.HotPink);
+                            }
                         }
                     }
                 }
+                // Si no hay ningún esqueleto en los recibidos, no lo pintamos.
+                else return;
             }
+        }
+
+        /// <summary>
+        /// Pinta una articulacion en el canvas. Calcula también el mapeo de su posición:
+        /// </summary>
+        /// <param name="articulacion">Articulacíon a pintar.</param>
+        /// <param name="puntoMapeo">Variable donde guardaremos el punto de imagen de color tras ser mapeado.</param>
+        /// <param name="colorArticulacion">Color en que se pintará la articulación.</param>
+        void pintarArticulacion(Joint articulacion, ref ColorImagePoint puntoMapeo, Color colorArticulacion)
+        {
+            // Mapeamos la articulación para obtener su posición en la imagen:
+            puntoMapeo = this.kinectConectado.CoordinateMapper.MapSkeletonPointToColorPoint(articulacion.Position, ColorImageFormat.RgbResolution640x480Fps30);
+
+            // Creamos la Elipse que añadiremos al canvas:
+            Ellipse art = new Ellipse();
+            
+            // Asignamos las propiedades de la elipse. Nos interesa que sea igual de alta que de ancha para que sea un círculo. 
+            // También nos interesa que sea relativamente gruesa, para que se vea bien. El color será el que obtenemos por parámetro.
+            art.Width = 14;
+            art.Height = 14;
+            art.Stroke = new SolidColorBrush(colorArticulacion);
+            art.StrokeThickness = 10;
+
+            // Añadimos unos márgenes a la Elipse, para que se situe en la posición correcta dentro del Canvas:
+            art.Margin = new Thickness(puntoMapeo.X, puntoMapeo.Y, 0, 0);
+
+            // Por úlitmo, añadimos la elipse al canvas para pintarla.
+            this.canvasSalidaKinect.Children.Add(art);
         }
 
         /// <summary>
@@ -256,6 +294,10 @@
             hueso.X2 = a2.X;
             hueso.Y1 = a1.Y;
             hueso.Y2 = a2.Y;
+
+            // Definimos otros datos de la línea, como el grosor y el color:
+            hueso.Stroke = new SolidColorBrush(colorHueso);
+            hueso.StrokeThickness = 4;
 
             //Por último, añadimos la línea a nuestro Canvas:
             this.canvasSalidaKinect.Children.Add(hueso);
