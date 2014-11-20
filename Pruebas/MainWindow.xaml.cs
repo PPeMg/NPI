@@ -9,6 +9,7 @@
     // Mis agregados:
     using Microsoft.Kinect;
     using System.IO;
+    using System.Windows.Shapes;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -34,12 +35,6 @@
         /// Esta variable almacenará el valor del slider que controla la saturación:
         /// </summary>
         private int valorSaturacion;
-
-        /// <summary>
-        /// Esta variable booleana activa y desactiva los cálculos de saturación:
-        /// </summary>
-        private bool activarSaturacion;
-
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -87,8 +82,9 @@
                     null                                                        // Paleta del Bitmap
                 );
 
-                // Asignamos nuestro bitmap a la imagen que mostraremos
-                this.ImagenColorStream.Source = this.colorBitmap;
+                // Creamos un pincel de imagen a partir de nuestro bitmap de color para pintar el fondo del canvas. De esta forma,
+                // Cuando pintemos el esqueleto, lo haremos sobre la imagen de color, de forma que podremos ver ambas imágenes superpuestas.
+                this.canvasSalidaKinect.Background = new ImageBrush(this.colorBitmap);
 
                 // Añadimos un manejador para cuando el kinect esté recibiendo imágenes del Color Stream
                 this.kinectConectado.ColorFrameReady += this.SensorColorFrameReady;
@@ -148,7 +144,7 @@
                     // Copiamos los datos al vector que hemos declarado antes.
                     colorStreamFrame.CopyPixelDataTo(this.colorPixels);
 
-
+                    // Si está activado el checkbox de control de Saturación:
                     if ((bool)SaturacionCheckbox.IsChecked)
                     {
                         int valorNuevo = 0;
@@ -207,18 +203,63 @@
         /// <param name="e">event arguments</param>
         void kinectConectado_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
+            // Vaciamos el Canvas del esqueleto actual:
+            this.canvasSalidaKinect.Children.Clear();
+            // Vector que contendrá
             Skeleton[] esqueletos = null;
 
             using (SkeletonFrame frameEsqueletos = e.OpenSkeletonFrame())
             {
+                // Comprobamos que no hayamos recibido un frame vacío:
                 if (frameEsqueletos != null)
                 {
+                    // Rellenamos el vector de esqueletos con los datos del frame:
                     esqueletos = new Skeleton[frameEsqueletos.SkeletonArrayLength];
                     frameEsqueletos.CopySkeletonDataTo(esqueletos);
+                }
+
+                // Si hay algún esqueleto recibido:
+                if (esqueletos.Length != 0)
+                {
+                    // Para cada esqueleto
+                    foreach(Skeleton esq in esqueletos)
+                    {
+                        // Si todo el esqueleto está siendo detectado (TRACKED)
+                        if (esq.TrackingState == SkeletonTrackingState.Tracked)
+                        {
+
+                        }
+                    }
                 }
             }
         }
 
+        /// <summary>
+        /// Pinta un hueso en el canvas:
+        /// </summary>
+        /// <param name="articulacion1">Primera articulacíon implicada en el hueso.</param>
+        /// <param name="articulacion2">Segunda articulacíon implicada en el hueso.</param>
+        /// <param name="colorHueso">Color en que se pintará el hueso.</param>
+        void pintarHueso(Joint articulacion1, Joint articulacion2, Color colorHueso)
+        {
+            // Declaramos dos puntos de color, que utlizaremos para guardar el resultado del mapeo:
+            ColorImagePoint a1, a2;
+
+            // Mapeamos ambas articulaciones. Utilizaremos mapeo de esqueleto a color, que es lo que necesitamos:
+            a1 = this.kinectConectado.CoordinateMapper.MapSkeletonPointToColorPoint(articulacion1.Position, ColorImageFormat.RgbResolution640x480Fps30);
+            a2 = this.kinectConectado.CoordinateMapper.MapSkeletonPointToColorPoint(articulacion2.Position, ColorImageFormat.RgbResolution640x480Fps30); 
+
+            // Ahora creamos una línea para añadirla al canvas. Esta línea sera nuestro hueso. Para ello,
+            // añadimos las dos coordenadas de cada articulación como los dos extremos de la línea:
+            Line hueso = new Line();
+            hueso.X1 = a1.X;
+            hueso.X2 = a2.X;
+            hueso.Y1 = a1.Y;
+            hueso.Y2 = a2.Y;
+
+            //Por último, añadimos la línea a nuestro Canvas:
+            this.canvasSalidaKinect.Children.Add(hueso);
+        }
 
         /// <summary>
         /// Manejador para cuando se hace click en el botón de captura de pantalla:
@@ -248,7 +289,7 @@
             string myPhotos = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
 
             // En este string encadenamos los dos anteriores dándole el formato requerido.
-            string path = Path.Combine(myPhotos, "KinectSnapshot-" + time + ".png");
+            string path = System.IO.Path.Combine(myPhotos, "KinectSnapshot-" + time + ".png");
 
             // Por último guardamos la imagen en un archivo. Para ello creamos un flujo de datos indicando en el path la ruta 
             // dónde guardaremos nuestra imagen.
@@ -275,6 +316,11 @@
         {
             // Almacenamos el valor de saturación del slider.
             this.valorSaturacion = (int)SaturacionSlider.Value;
+        }
+
+        private void SalidaKinect_Loaded(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

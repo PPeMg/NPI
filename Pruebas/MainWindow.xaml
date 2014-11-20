@@ -48,12 +48,16 @@
             <TextBlock DockPanel.Dock="Right" Margin="0 0 -1 0" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18">Prueba Kinect</TextBlock>
             <Image Source="Images\Status.png" Stretch="None" HorizontalAlignment="Center" Margin="0 0 0 5"/>
         </DockPanel>
-        <Viewbox Grid.Row="1" Stretch="Uniform" HorizontalAlignment="Center" Height="551" VerticalAlignment="Bottom">
-            <Image Name="ImagenColorStream" Width="640" Height="480"/>
+        <Viewbox Stretch="Uniform" HorizontalAlignment="Center" Height="551" VerticalAlignment="Bottom" Margin="34,0" Grid.Row="1">
+            <!-- Canvas de Salida:-->
+            <Canvas Name="canvasSalidaKinect" Width="640" Height="530" Loaded="SalidaKinect_Loaded" />
         </Viewbox>
         <Button Grid.Row="2" Style="{StaticResource SnapshotButton}" Content="Capturar Imagen" Height="Auto" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10 10 0 10" Name="buttonScreenshot" Click="ButtonScreenshotClick" />
+        <!-- Control de Saturación:-->
         <Slider Grid.Row="2" Height="23" HorizontalAlignment="Left" Maximum="255" Minimum="-255" Margin="211,14,0,0" Name="SaturacionSlider" VerticalAlignment="Top" Width="175" ValueChanged="SaturacionSlider_ValueChanged" />
         <CheckBox Content="Activar Control de Saturacion" Grid.Row="2" Height="16" HorizontalAlignment="Left" Margin="12,14,0,0" Name="SaturacionCheckbox" VerticalAlignment="Top" />
+        <!-- Pintar Esqueleto o no:-->
+        <CheckBox Content="Activar Esqueleto" Grid.Row="2" Height="16" HorizontalAlignment="Left" Margin="418,14,0,0" Name="SkeletonCheckbox" VerticalAlignment="Top" IsChecked="True" />
         <StatusBar Grid.Row="3" HorizontalAlignment="Stretch" Name="statusBar" VerticalAlignment="Bottom" Background="White" Foreground="{StaticResource MediumGreyBrush}">
             <StatusBarItem Padding="0 0 0 10">
                 <TextBlock Name="textoEstadoKinect" Margin="-1 0 0 0">Pulsar el botón para realizar captura de pantalla.</TextBlock>
