@@ -50,7 +50,6 @@
         </DockPanel>
         <Viewbox Stretch="Uniform" HorizontalAlignment="Center" Height="551" VerticalAlignment="Bottom" Margin="34,0" Grid.Row="1">
             <!-- Canvas de Salida:-->
-            <Canvas Name="canvasSalidaKinect" Width="640" Height="530" Loaded="SalidaKinect_Loaded" />
         </Viewbox>
         <Button Grid.Row="2" Style="{StaticResource SnapshotButton}" Content="Capturar Imagen" Height="Auto" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10 10 0 10" Name="buttonScreenshot" Click="ButtonScreenshotClick" />
         <!-- Control de Saturación:-->
@@ -63,5 +62,6 @@
                 <TextBlock Name="textoEstadoKinect" Margin="-1 0 0 0">Pulsar el botón para realizar captura de pantalla.</TextBlock>
             </StatusBarItem>
         </StatusBar>
+        <Canvas Name="canvasSalidaKinect" Width="640" Height="480" Margin="55,12,33,59" Grid.Row="1" />
     </Grid>
 </Window>

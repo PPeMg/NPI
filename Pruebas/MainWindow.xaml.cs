@@ -37,6 +37,12 @@
         private int valorSaturacion;
 
         /// <summary>
+        /// Esta variable almacenará un booleano que nos servirá para hacer más eficiente el proceso de
+        /// activar y desactivar el modo esqueleto:
+        /// </summary>
+        private bool cambioModoEsqueleto = false;
+
+        /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
@@ -203,45 +209,55 @@
         /// <param name="e">event arguments</param>
         void kinectConectado_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-            // Vaciamos el Canvas del esqueleto actual:
-            this.canvasSalidaKinect.Children.Clear();
-            // Vector que contendrá
-            Skeleton[] esqueletos = null;
-
-            using (SkeletonFrame frameEsqueletos = e.OpenSkeletonFrame())
+            //Comprobamos si está activado el checkbox de Esqueleto. Si no lo está, no mostramos el esqueleto:
+            if ((bool)SkeletonCheckbox.IsChecked)
             {
-                // Comprobamos que no hayamos recibido un frame vacío:
-                if (frameEsqueletos != null)
-                {
-                    // Rellenamos el vector de esqueletos con los datos del frame:
-                    esqueletos = new Skeleton[frameEsqueletos.SkeletonArrayLength];
-                    frameEsqueletos.CopySkeletonDataTo(esqueletos);
-                }
+                // Esta condición simplemente sirve para no ejecutar continuamente el vaciado del canvas cuando se
+                // desactiva el checkbox:
+                if (!this.cambioModoEsqueleto)
+                    this.cambioModoEsqueleto = true;
 
-                // Si hay algún esqueleto recibido:
-                if (esqueletos != null)
+                // Vaciamos el Canvas del esqueleto actual:
+                this.canvasSalidaKinect.Children.Clear();
+                // Vector que contendrá
+                Skeleton[] esqueletos = null;
+
+                using (SkeletonFrame frameEsqueletos = e.OpenSkeletonFrame())
                 {
-                    // Para cada esqueleto
-                    foreach (Skeleton esq in esqueletos)
+                    // Comprobamos que no hayamos recibido un frame vacío:
+                    if (frameEsqueletos != null)
                     {
-                        // Si todo el esqueleto está siendo detectado (TRACKED)
-                        if (esq.TrackingState == SkeletonTrackingState.Tracked)
-                        {
-                            Joint cabeza = esq.Joints[JointType.Head];
-                            Joint cuello = esq.Joints[JointType.ShoulderCenter];
-                            pintarHueso(cabeza, cuello, Colors.Aqua);
+                        // Rellenamos el vector de esqueletos con los datos del frame:
+                        esqueletos = new Skeleton[frameEsqueletos.SkeletonArrayLength];
+                        frameEsqueletos.CopySkeletonDataTo(esqueletos);
+                    }
 
-                            foreach (Joint art in esq.Joints)
+                    // Si hay algún esqueleto recibido:
+                    if (esqueletos != null)
+                    {
+                        // Para cada esqueleto
+                        foreach (Skeleton esq in esqueletos)
+                        {
+                            // Si todo el esqueleto está siendo detectado (TRACKED)
+                            if (esq.TrackingState == SkeletonTrackingState.Tracked)
                             {
-                                ColorImagePoint punto = new ColorImagePoint();
-                                pintarArticulacion(art, ref punto, Colors.HotPink);
+                                pintarEsqueleto(esq, Colors.Violet, Colors.Black);
                             }
                         }
                     }
+                    // Si no hay ningún esqueleto en los recibidos, no lo pintamos.
+                    else return;
                 }
-                // Si no hay ningún esqueleto en los recibidos, no lo pintamos.
-                else return;
             }
+            else
+            {
+                if (this.cambioModoEsqueleto)
+                {
+                    this.canvasSalidaKinect.Children.Clear();
+                    this.cambioModoEsqueleto = false;
+                }
+            }
+
         }
 
         /// <summary>
@@ -250,10 +266,10 @@
         /// <param name="articulacion">Articulacíon a pintar.</param>
         /// <param name="puntoMapeo">Variable donde guardaremos el punto de imagen de color tras ser mapeado.</param>
         /// <param name="colorArticulacion">Color en que se pintará la articulación.</param>
-        void pintarArticulacion(Joint articulacion, ref ColorImagePoint puntoMapeo, Color colorArticulacion)
+        void pintarArticulacion(Joint articulacion, Color colorArticulacion)
         {
             // Mapeamos la articulación para obtener su posición en la imagen:
-            puntoMapeo = this.kinectConectado.CoordinateMapper.MapSkeletonPointToColorPoint(articulacion.Position, ColorImageFormat.RgbResolution640x480Fps30);
+            ColorImagePoint puntoMapeo = this.kinectConectado.CoordinateMapper.MapSkeletonPointToColorPoint(articulacion.Position, ColorImageFormat.RgbResolution640x480Fps30);
 
             // Creamos la Elipse que añadiremos al canvas:
             Ellipse art = new Ellipse();
@@ -285,7 +301,7 @@
 
             // Mapeamos ambas articulaciones. Utilizaremos mapeo de esqueleto a color, que es lo que necesitamos:
             a1 = this.kinectConectado.CoordinateMapper.MapSkeletonPointToColorPoint(articulacion1.Position, ColorImageFormat.RgbResolution640x480Fps30);
-            a2 = this.kinectConectado.CoordinateMapper.MapSkeletonPointToColorPoint(articulacion2.Position, ColorImageFormat.RgbResolution640x480Fps30); 
+            a2 = this.kinectConectado.CoordinateMapper.MapSkeletonPointToColorPoint(articulacion2.Position, ColorImageFormat.RgbResolution640x480Fps30);
 
             // Ahora creamos una línea para añadirla al canvas. Esta línea sera nuestro hueso. Para ello,
             // añadimos las dos coordenadas de cada articulación como los dos extremos de la línea:
@@ -301,6 +317,50 @@
 
             //Por último, añadimos la línea a nuestro Canvas:
             this.canvasSalidaKinect.Children.Add(hueso);
+        }
+
+        /// <summary>
+        /// Pinta un esqueleto completo. Para evitar que se olvide ningún hueso, pinta de fuera hacia dentro 
+        /// y de arriba a abajo todas las partes del cuerpo. Se asume que el esqueleto está correcto, hay que 
+        /// realizar la comprobación antes de llamar a la función:
+        /// </summary>
+        /// <param name="esqueleto">Esqueleto que queremos pintar</param>
+        void pintarEsqueleto(Skeleton esqueleto, Color colorHuesos, Color colorArticulaciones)
+        {
+            // Pintamos la parte central del esqueleto, la columna vertebral:
+            pintarHueso(esqueleto.Joints[JointType.Head], esqueleto.Joints[JointType.ShoulderCenter], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.ShoulderCenter], esqueleto.Joints[JointType.Spine], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.Spine], esqueleto.Joints[JointType.HipCenter], colorHuesos);
+
+            // Ahora pintamos el brazo izquierdo:
+            pintarHueso(esqueleto.Joints[JointType.HandLeft], esqueleto.Joints[JointType.WristLeft], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.ElbowLeft], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.ElbowLeft], esqueleto.Joints[JointType.ShoulderLeft], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.ShoulderLeft], esqueleto.Joints[JointType.ShoulderCenter], colorHuesos);
+
+            // Seguidamente, pintamos el brazo derecho:
+            pintarHueso(esqueleto.Joints[JointType.HandRight], esqueleto.Joints[JointType.WristRight], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.WristRight], esqueleto.Joints[JointType.ElbowRight], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.ElbowRight], esqueleto.Joints[JointType.ShoulderRight], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.ShoulderRight], esqueleto.Joints[JointType.ShoulderCenter], colorHuesos);
+
+            // A continuación, pintamos la pierna izquierda
+            pintarHueso(esqueleto.Joints[JointType.FootLeft], esqueleto.Joints[JointType.AnkleLeft], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.AnkleLeft], esqueleto.Joints[JointType.KneeLeft], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.KneeLeft], esqueleto.Joints[JointType.HipLeft], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.HipLeft], esqueleto.Joints[JointType.HipCenter], colorHuesos);
+
+            // Por último, pintamos la pierna derecho:
+            pintarHueso(esqueleto.Joints[JointType.FootRight], esqueleto.Joints[JointType.AnkleRight], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.AnkleRight], esqueleto.Joints[JointType.KneeRight], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.KneeRight], esqueleto.Joints[JointType.HipRight], colorHuesos);
+            pintarHueso(esqueleto.Joints[JointType.HipRight], esqueleto.Joints[JointType.HipCenter], colorHuesos);
+
+            // Y para acabar, mostramos todas las articulaciones sobre los huesos:
+            foreach (Joint art in esqueleto.Joints)
+            {
+                pintarArticulacion(art, colorArticulaciones);
+            }
         }
 
         /// <summary>
@@ -360,9 +420,5 @@
             this.valorSaturacion = (int)SaturacionSlider.Value;
         }
 
-        private void SalidaKinect_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }
