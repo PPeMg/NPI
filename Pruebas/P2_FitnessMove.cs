@@ -67,7 +67,7 @@ namespace Microsoft.Samples.Kinect.ColorBasics
 
                 }//CLOSE if (joint.TrackingState == JointTrackingState.Tracked)
             }
-            // ESTO ES SOLO PARA QUE COMPILE SI HACE FALTA, ESTA MAL LA FUNCION.
+            // ESTO ES SOLO PARA QUE COMPILE SI HACE FALTA, ESTA MAL LA FUNCION COMPLETAMENTE.
             return true;
         }
     }
