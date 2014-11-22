@@ -32,9 +32,9 @@
         private byte[] colorPixels;
 
         /// <summary>
-        /// Esta variable almacenará el valor del slider que controla la saturación:
+        /// Objeto que controla las posturas a realizar:
         /// </summary>
-        private int valorSaturacion;
+        private P2_FitnessMove controlMovimiento = new P2_FitnessMove();
 
         /// <summary>
         /// Esta variable almacenará un booleano que nos servirá para hacer más eficiente el proceso de
@@ -150,48 +150,6 @@
                     // Copiamos los datos al vector que hemos declarado antes.
                     colorStreamFrame.CopyPixelDataTo(this.colorPixels);
 
-                    // Si está activado el checkbox de control de Saturación:
-                    if ((bool)SaturacionCheckbox.IsChecked)
-                    {
-                        int valorNuevo = 0;
-
-                        for (int i = 0; i < colorStreamFrame.PixelDataLength; i += 4)
-                        {
-                            // Cambiamos el color azul:
-                            valorNuevo = (int)this.colorPixels[i];
-                            if (valorNuevo + this.valorSaturacion >= 255)
-                                valorNuevo = 255;
-                            else if (valorNuevo + this.valorSaturacion <= 0)
-                                valorNuevo = 0;
-                            else
-                                valorNuevo += this.valorSaturacion;
-
-                            this.colorPixels[i] = (byte)valorNuevo;
-
-                            // Cambiamos el color verde:
-                            valorNuevo = (int)this.colorPixels[i + 1];
-                            if (valorNuevo + this.valorSaturacion >= 255)
-                                valorNuevo = 255;
-                            else if (valorNuevo + this.valorSaturacion <= 0)
-                                valorNuevo = 0;
-                            else
-                                valorNuevo += this.valorSaturacion;
-
-                            this.colorPixels[i + 1] = (byte)valorNuevo;
-
-                            // Y ahora cambiamos el color rojo:
-                            valorNuevo = (int)this.colorPixels[i + 2];
-                            if (valorNuevo + this.valorSaturacion >= 255)
-                                valorNuevo = 255;
-                            else if (valorNuevo + this.valorSaturacion <= 0)
-                                valorNuevo = 0;
-                            else
-                                valorNuevo += this.valorSaturacion;
-
-                            this.colorPixels[i + 2] = (byte)valorNuevo;
-                        }
-                    }
-
                     // Escribimos la imagen en nuestro bitmap. De esta forma, se mostrará en pantalla.
                     this.colorBitmap.WritePixels(
                         new Int32Rect(0, 0, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight),
@@ -209,6 +167,11 @@
         /// <param name="e">event arguments</param>
         void kinectConectado_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
+            // Creamos un string para mostrar la tolerancia por pantalla:
+            int tol = (int)(this.controlMovimiento.getTolerancia() * 100);
+            string mensaje = "Tolerancia = " + tol + "%";
+            this.toleranciaTexBlock.Text = mensaje;
+
             //Comprobamos si está activado el checkbox de Esqueleto. Si no lo está, no mostramos el esqueleto:
             if ((bool)SkeletonCheckbox.IsChecked)
             {
@@ -234,9 +197,7 @@
 
                     // Si hay algún esqueleto recibido:
                     if (esqueletos != null)
-                    {
-                        P2_FitnessMove controlMovimiento = new P2_FitnessMove(0.45);
-
+                    {                      
                         // Para cada esqueleto
                         foreach (Skeleton esq in esqueletos)
                         {
@@ -385,9 +346,17 @@
             // un codificador png.
             BitmapEncoder encoder = new PngBitmapEncoder();
 
-            // Añadimos el la imagen actual del flujo al codificador.
-            encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
-            
+            if ((bool)this.SkeletonCheckbox.IsChecked)
+            {
+                //Buscar forma de hacer captura del esqueleto. Mientras:
+                // Añadimos el la imagen actual del flujo al codificador.
+                encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
+            }
+            else
+            {
+                // Añadimos el la imagen actual del flujo al codificador.
+                encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
+            }
             // Añadimos la fecha con el formato deseado a un string, lo que nos servirá para añadirla al nombre del archivo .png.
             // Esto puede resultarnos útil para ordenar capturas o para llevar un registro.
             string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
@@ -416,13 +385,13 @@
         }
 
         /// <summary>
-        /// Manejador para cuando cambie el valor de saturación:
+        /// Manejador para cuando cambie el valor de tolerancia:
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
-        private void SaturacionSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void TolSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            // Almacenamos el valor de saturación del slider.
-            this.valorSaturacion = (int)SaturacionSlider.Value;
+            // Modificamos la tolerancia aceptada por el objeto de control. Para ello usamos el valor del slider.
+            this.controlMovimiento.setTolerancia((double)TolSlider.Value);
         }
 
     }

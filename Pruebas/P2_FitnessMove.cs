@@ -15,7 +15,17 @@ namespace Microsoft.Samples.Kinect.ColorBasics
 
         public P2_FitnessMove(double tol = 0.05)
         {
-            this.tolerancia = 2*tol;
+            this.tolerancia = tol;
+        }
+
+        public double getTolerancia() 
+        {
+            return this.tolerancia; 
+        }
+
+        public void setTolerancia(double tol)
+        {
+            this.tolerancia = tol;
         }
 
         /************************ Métodos de Comprobación del esqueleto ************************/
@@ -78,6 +88,49 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             return enPosicion;
         }
 
+
+
+        /// <summary>
+        /// Método que comprueba si los brazos están extendidos y a la misma altura (en cruz).
+        /// </summary>
+        /// <param name="LeftHand">Mano izquierda del esqueleto </param>
+        /// <param name="LeftWrist">Muñeca izquierda del esqueleto </param>
+        /// <param name="LeftElbow">Codo izquierdo del esqueleto </param>
+        /// <param name="LeftShoulder">Hombro izquierdo del esqueleto </param>
+        /// <param name="RightHand">Mano derecha del esqueleto </param>
+        /// <param name="RightWrist">Muñeca dercha del esqueleto </param>
+        /// <param name="RightElbow">Codo derecho del esqueleto </param>
+        /// <param name="RightShoulder">Hombro derecho del esqueleto </param>
+        private bool brazosEnCruz(Joint LeftHand, Joint LeftWrist, Joint LeftElbow, Joint LeftShoulder, Joint RightHand, Joint RightWrist, Joint RightElbow, Joint RightShoulder)
+        {
+            bool enPosicion;
+
+            // Comprobamos que el brazo izquierdo tiene todas sus articulaciones aproximadamente a la 
+            // misma altura (tienen la misma Y). Empezamos con la mano con respecto a la muñeca:
+            double topeSuperior = LeftHand.Position.Y * (1.0 + this.tolerancia);
+            double topeInferior = LeftHand.Position.Y * (1.0 - this.tolerancia);
+
+            if (LeftElbow.Position.Y > topeSuperior)
+                enPosicion = false;
+            else if (LeftElbow.Position.Y < topeInferior)
+                enPosicion = false;
+            else
+            {
+                // Ahora realizamos las mismas operaciones con el otro brazo:
+                topeSuperior = RightHand.Position.Y * (1.0 + this.tolerancia);
+                topeInferior = RightHand.Position.Y * (1.0 - this.tolerancia);
+
+                if (RightElbow.Position.Y > topeSuperior)
+                    enPosicion = false;
+                else if (RightElbow.Position.Y < topeInferior)
+                    enPosicion = false;
+                else
+                    enPosicion = true;
+            }
+
+            return enPosicion;
+        }
+        /**************************************************************************************************** /
         /// <summary>
         /// Método que comprueba si los brazos están extendidos y a la misma altura (en cruz).
         /// </summary>
@@ -150,5 +203,8 @@ namespace Microsoft.Samples.Kinect.ColorBasics
 
             return enPosicion;
         }
+        
+        /****************************************************************************************************/
+        
     }
 }

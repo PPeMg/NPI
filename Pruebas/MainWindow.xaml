@@ -39,8 +39,8 @@
     <Grid Name="layoutGrid" Margin="10 0 10 0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="538*"/>
+            <RowDefinition Height="65"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <DockPanel Grid.Row="0" Margin="0 0 0 20">
@@ -52,8 +52,8 @@
             <!-- Canvas de Salida:-->
         </Viewbox>
         <Button Grid.Row="2" Style="{StaticResource SnapshotButton}" Content="Capturar Imagen" Height="Auto" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10 10 0 10" Name="buttonScreenshot" Click="ButtonScreenshotClick" />
-        <!-- Control de Saturación:-->
-        <Slider Grid.Row="2" Height="23" HorizontalAlignment="Left" Maximum="255" Minimum="-255" Margin="211,14,0,0" Name="SaturacionSlider" VerticalAlignment="Top" Width="175" ValueChanged="SaturacionSlider_ValueChanged" />
+        <!-- Control de Tolerancia:-->
+        <Slider Grid.Row="2" Height="23" HorizontalAlignment="Left" Maximum="0.50" Minimum="0.00" Margin="211,14,0,0" Name="TolSlider" VerticalAlignment="Top" Width="175" ValueChanged="TolSlider_ValueChanged" />
         <CheckBox Content="Activar Control de Saturacion" Grid.Row="2" Height="16" HorizontalAlignment="Left" Margin="12,14,0,0" Name="SaturacionCheckbox" VerticalAlignment="Top" />
         <!-- Pintar Esqueleto o no:-->
         <CheckBox Content="Activar Esqueleto" Grid.Row="2" Height="16" HorizontalAlignment="Left" Margin="418,14,0,0" Name="SkeletonCheckbox" VerticalAlignment="Top" IsChecked="True" />
@@ -63,5 +63,6 @@
             </StatusBarItem>
         </StatusBar>
         <Canvas Name="canvasSalidaKinect" Width="640" Height="480" Margin="55,12,33,59" Grid.Row="1" />
+        <TextBlock Grid.Row="2" Height="23" HorizontalAlignment="Left" Margin="211,42,0,0" Name="toleranciaTexBlock" Text="Tolerancia = " VerticalAlignment="Top" Width="175" />
     </Grid>
 </Window>
