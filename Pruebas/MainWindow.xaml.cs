@@ -235,7 +235,7 @@
                     // Si hay algún esqueleto recibido:
                     if (esqueletos != null)
                     {
-                        P2_FitnessMove controlMovimiento = new P2_FitnessMove();
+                        P2_FitnessMove controlMovimiento = new P2_FitnessMove(0.45);
 
                         // Para cada esqueleto
                         foreach (Skeleton esq in esqueletos)
