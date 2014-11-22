@@ -235,13 +235,18 @@
                     // Si hay algún esqueleto recibido:
                     if (esqueletos != null)
                     {
+                        P2_FitnessMove controlMovimiento = new P2_FitnessMove();
+
                         // Para cada esqueleto
                         foreach (Skeleton esq in esqueletos)
                         {
                             // Si todo el esqueleto está siendo detectado (TRACKED)
                             if (esq.TrackingState == SkeletonTrackingState.Tracked)
                             {
-                                pintarEsqueleto(esq, Colors.Violet, Colors.Black);
+                                if (controlMovimiento.PosicionBasica(esq))
+                                    pintarEsqueleto(esq, Colors.Green, Colors.Violet);
+                                else
+                                    pintarEsqueleto(esq, Colors.Red, Colors.Violet);
                             }
                         }
                     }
