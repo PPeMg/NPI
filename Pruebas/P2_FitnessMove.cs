@@ -13,9 +13,39 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         /// </summary>
         private double tolerancia;
 
-        public P2_FitnessMove(double tol = 0.05)
+        /// <summary>
+        /// Valor que indica cuanto se tiene que mantener una postura para reconocerla:
+        /// </summary>
+        private int vecesNecesarias;
+
+        /// <summary>
+        /// Cadena de caracteres que se usa para almacenar el feedback del movimiento:
+        /// </summary>
+        private String feedBack;
+
+        /************************ Fases del Movimiento y Controld de duración ************************/
+        /// <summary>
+        /// Variable que se usa para comprobar si el esqueleto reconocido se ha situado en la posición base
+        /// </summary>
+        private bool posturaBaseFinalizada;
+
+        /// <summary>
+        /// Variable que se usa para comprobar la detección correcta de la postura un cierto número de veces:
+        /// </summary>
+        private int vecesCorrecta;
+
+
+
+        public P2_FitnessMove(double tol = 0.05, int nveces = 10)
         {
             this.tolerancia = tol;
+            this.vecesNecesarias = nveces;
+
+            // Inicializamos todas las fases a falso, ya que aún no se ha ejecutado ninguna:
+            this.posturaBaseFinalizada = false;
+            this.vecesCorrecta = 0;
+            
+            this.feedBack = "";
         }
 
         public double getTolerancia() 
@@ -26,6 +56,11 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         public void setTolerancia(double tol)
         {
             this.tolerancia = tol;
+        }
+
+        public String getFeedBack()
+        {
+            return this.feedBack;
         }
 
         /************************ Métodos de Comprobación del esqueleto ************************/
@@ -42,16 +77,35 @@ namespace Microsoft.Samples.Kinect.ColorBasics
 
             // Primero vamos a controlar la posición de la columna.
             if (!EspaldaErguida(esqueleto.Joints[JointType.Head], esqueleto.Joints[JointType.ShoulderCenter], esqueleto.Joints[JointType.Spine]))
+            {
                 enPosicion = false;
-            // Ahora vamos a ver los brazos:
+                this.feedBack += "\tColóquese Recto.\n";
+            }
+            // Ahora comprobamos las piernas:
+            else if (!piernasAbiertas(esqueleto.Joints[JointType.FootLeft], esqueleto.Joints[JointType.FootRight], esqueleto.Joints[JointType.HipCenter]))
+            {
+                enPosicion = false;
+                this.feedBack += "\tColumna: OK.\n";
+                this.feedBack += "\tAbra las piernas unos 60º\n";
+            }
+            // Por último, vamos a ver los brazos:
             else if (!brazosEnCruz(esqueleto.Joints[JointType.HandLeft], esqueleto.Joints[JointType.ElbowLeft],
                                     esqueleto.Joints[JointType.HandRight], esqueleto.Joints[JointType.ElbowRight]))
+            {
                 enPosicion = false;
-            // Por último, comprobamos las piernas:
-            else if (!piernasAbiertas(esqueleto.Joints[JointType.FootLeft], esqueleto.Joints[JointType.FootRight], esqueleto.Joints[JointType.HipCenter]))
-                enPosicion = false;
+                this.feedBack += "\tColumna: OK.\n";
+                this.feedBack += "\tPiernas abiertas: OK\n";
+                this.feedBack += "\tColoque los brazos en Cruz.\n";
+            }
+            
+            // Si todo va bien, ponemos a verdadero el valor de retorno:
             else
+            {
                 enPosicion = true;
+                this.feedBack += "\tColumna: OK.\n";
+                this.feedBack += "\tPiernas abiertas: OK\n";
+                this.feedBack += "\tBrazos en Cruz: OK\n";
+            }
 
             return enPosicion;
         }
@@ -90,8 +144,6 @@ namespace Microsoft.Samples.Kinect.ColorBasics
 
             return enPosicion;
         }
-
-
 
         /// <summary>
         /// Método que comprueba si los brazos están extendidos y a la misma altura (en cruz).
@@ -173,6 +225,50 @@ namespace Microsoft.Samples.Kinect.ColorBasics
                 enPosicion = true;
 
             return enPosicion;
+        }
+
+
+        /// <summary>
+        /// Método que comprueba la correcta realización del movimiento.
+        /// </summary>
+        public bool movimientoRealizado(Skeleton esqueleto)
+        {
+            this.feedBack = "Información del Movimiento: \n";
+
+            // El retorno será false a menos que indiquemos lo contrario. Esto se hará solo cuando se haya terminado correctamente el movimiento:
+            bool terminadoCorrectamente = false;
+
+            // Primero hay que controlar que partimos de la posición inicial:
+            if (!posturaBaseFinalizada)
+            {
+                // Si no se ha establecido aún, comprobamos si está en la posición básica:
+                if(this.PosicionBasica(esqueleto)){
+                    this.vecesCorrecta ++;
+
+                    // Si se ha mantenido el tiempo suficiente, ponemos a true la variable que comprueba que se ha 
+                    // terminado correctamente esta fase:
+                    if (this.vecesCorrecta >= this.vecesNecesarias)
+                    {
+                        posturaBaseFinalizada = true;
+                        this.feedBack += "\nPosición Básica correcta.\n";
+                    }
+                    else
+                        this.feedBack += "\nPosición Básica: " + this.vecesCorrecta + "\n";
+                }
+
+                // Si aún no hemos alcanzado la posición inicial, reiniciamos el acumulador:
+                else
+                    this.vecesCorrecta = 0;
+            }
+
+            else
+            {
+                terminadoCorrectamente = true;
+            }
+
+
+
+            return terminadoCorrectamente;
         }
     }
 }

@@ -170,7 +170,9 @@
             // Creamos un string para mostrar la tolerancia por pantalla:
             int tol = (int)(this.controlMovimiento.getTolerancia() * 100);
             string mensaje = "Tolerancia = " + tol + "%";
+            string mensajeFeedback = this.controlMovimiento.getFeedBack();
             this.toleranciaTexBlock.Text = mensaje;
+            this.FeedbackTexBlock.Text = mensajeFeedback;
 
             //Comprobamos si está activado el checkbox de Esqueleto. Si no lo está, no mostramos el esqueleto:
             if ((bool)SkeletonCheckbox.IsChecked)
@@ -204,7 +206,7 @@
                             // Si todo el esqueleto está siendo detectado (TRACKED)
                             if (esq.TrackingState == SkeletonTrackingState.Tracked)
                             {
-                                if (controlMovimiento.PosicionBasica(esq))
+                                if (controlMovimiento.movimientoRealizado(esq))
                                     pintarEsqueleto(esq, Colors.Green, Colors.Violet);
                                 else
                                     pintarEsqueleto(esq, Colors.Red, Colors.Violet);

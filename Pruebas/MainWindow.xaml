@@ -1,7 +1,7 @@
 ﻿<Window x:Class="Microsoft.Samples.Kinect.ColorBasics.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="Prueba Kinect" Height="735" Width="770" Loaded="WindowLoaded" Closing="WindowClosing">
+    Title="Prueba Kinect" Height="735" Width="921" Loaded="WindowLoaded" Closing="WindowClosing">
 
     <Window.Resources>
         <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e"/>
@@ -62,7 +62,8 @@
                 <TextBlock Name="textoEstadoKinect" Margin="-1 0 0 0">Pulsar el botón para realizar captura de pantalla.</TextBlock>
             </StatusBarItem>
         </StatusBar>
-        <Canvas Name="canvasSalidaKinect" Width="640" Height="480" Margin="55,12,33,59" Grid.Row="1" />
+        <Canvas Name="canvasSalidaKinect" Width="640" Height="480" Margin="35,12,204,46" Grid.Row="1" />
         <TextBlock Grid.Row="2" Height="23" HorizontalAlignment="Left" Margin="211,42,0,0" Name="toleranciaTexBlock" Text="Tolerancia = " VerticalAlignment="Top" Width="175" />
+        <TextBlock Grid.Row="1" Height="229" HorizontalAlignment="Right" Margin="692,25,0,0" Name="FeedbackTexBlock" Text="Información" VerticalAlignment="Top" Width="175" FontSize="16" />
     </Grid>
 </Window>
