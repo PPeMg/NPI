@@ -71,52 +71,6 @@ namespace Microsoft.Samples.Kinect.ColorBasics
 
         /************************ Métodos de Comprobación del esqueleto ************************/
         /// <summary>
-        /// Método que comprueba si estamos en la posición básica, a saber:
-        /// Los brazos extendidos y paralelos al suelo.
-        /// El tronco erguido.
-        /// Las piernas extendidas, rectas y separadas por un ángulo de unos 60º
-        /// </summary>
-        /// <param name="esqueleto">Contiene el esqueleto sobre el que se trabaja</param>
-        public bool PosicionBasica(Skeleton esqueleto)
-        {
-            bool enPosicion;
-
-            // Primero vamos a controlar la posición de la columna.
-            if (!EspaldaErguida(esqueleto.Joints[JointType.Head], esqueleto.Joints[JointType.ShoulderCenter], esqueleto.Joints[JointType.Spine]))
-            {
-                enPosicion = false;
-                this.feedBack += "\tColóquese Recto.\n";
-            }
-            // Ahora comprobamos las piernas:
-            else if (!piernasAbiertas(esqueleto.Joints[JointType.FootLeft], esqueleto.Joints[JointType.FootRight], esqueleto.Joints[JointType.HipCenter]))
-            {
-                enPosicion = false;
-                this.feedBack += "\tColumna: OK.\n";
-                this.feedBack += "\tAbra las piernas unos 60º\n";
-            }
-            // Por último, vamos a ver los brazos:
-            else if (!brazosEnCruz(esqueleto.Joints[JointType.HandLeft], esqueleto.Joints[JointType.ElbowLeft],
-                                    esqueleto.Joints[JointType.HandRight], esqueleto.Joints[JointType.ElbowRight]))
-            {
-                enPosicion = false;
-                this.feedBack += "\tColumna: OK.\n";
-                this.feedBack += "\tPiernas abiertas: OK\n";
-                this.feedBack += "\tColoque los brazos en Cruz.\n";
-            }
-            
-            // Si todo va bien, ponemos a verdadero el valor de retorno:
-            else
-            {
-                enPosicion = true;
-                this.feedBack += "\tColumna: OK.\n";
-                this.feedBack += "\tPiernas abiertas: OK\n";
-                this.feedBack += "\tBrazos en Cruz: OK\n";
-            }
-
-            return enPosicion;
-        }
-
-        /// <summary>
         /// Método que comprueba si el esqueleto tiene la espalda erguida: 
         /// </summary>
         /// <param name="Head">Cabeza del esqueleto </param>
@@ -154,18 +108,19 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         /// <summary>
         /// Método que comprueba si los brazos están extendidos y a la misma altura (en cruz).
         /// </summary>
-        /// <param name="LeftHand">Mano izquierda del esqueleto </param>
+        /// <param name="RightWrist">Muñeca izquierda del esqueleto </param>
         /// <param name="LeftElbow">Codo izquierdo del esqueleto </param>
-        /// <param name="RightHand">Mano derecha del esqueleto </param>
+        /// <param name="RightWrist">Muñeca derecha del esqueleto </param>
         /// <param name="RightElbow">Codo derecho del esqueleto </param>
-        private bool brazosEnCruz(Joint LeftHand, Joint LeftElbow, Joint RightHand, Joint RightElbow)
+        private bool brazosEnCruz(Joint LeftWrist, Joint LeftElbow, Joint RightWrist, Joint RightElbow)
         {
             bool enPosicion;
 
             // Comprobamos que el brazo izquierdo tiene todas sus articulaciones aproximadamente a la 
-            // misma altura (tienen la misma Y). Empezamos con la mano con respecto a la muñeca:
-            double topeSuperior = LeftHand.Position.Y * (1.0 + this.tolerancia);
-            double topeInferior = LeftHand.Position.Y * (1.0 - this.tolerancia);
+            // misma altura (tienen la misma Y). Por cuestiones de precisión se usarán solo el codo y la
+            // muñeca.
+            double topeSuperior = LeftWrist.Position.Y * (1.0 + this.tolerancia);
+            double topeInferior = LeftWrist.Position.Y * (1.0 - this.tolerancia);
 
             if (LeftElbow.Position.Y > topeSuperior)
                 enPosicion = false;
@@ -174,8 +129,8 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             else
             {
                 // Ahora realizamos las mismas operaciones con el otro brazo:
-                topeSuperior = RightHand.Position.Y * (1.0 + this.tolerancia);
-                topeInferior = RightHand.Position.Y * (1.0 - this.tolerancia);
+                topeSuperior = RightWrist.Position.Y * (1.0 + this.tolerancia);
+                topeInferior = RightWrist.Position.Y * (1.0 - this.tolerancia);
 
                 if (RightElbow.Position.Y > topeSuperior)
                     enPosicion = false;
@@ -209,7 +164,7 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             y = y * y;
             z = z * z;
 
-            double distanciaPies = Math.Sqrt(x+y+z);
+            double distanciaPies = Math.Sqrt(x + y + z);
 
             // Ahora hacemos lo mismo con la distancia entre la cadera y una pierna, por ejemplo con la izquierda;
             x = (double)(LeftFoot.Position.X - Hip.Position.X);
@@ -232,7 +187,120 @@ namespace Microsoft.Samples.Kinect.ColorBasics
 
             return enPosicion;
         }
+        
+        /// <summary>
+        /// Método que comprueba si estamos en la posición básica, a saber:
+        /// Los brazos extendidos y paralelos al suelo.
+        /// El tronco erguido.
+        /// Las piernas extendidas, rectas y separadas por un ángulo de unos 60º
+        /// *BASADO EN MOVIMIENTO 4 del GitHub: https://github.com/catiribeiro46/SkeletonBasics
+        /// *En las pruebas realizadas no funcionaba correctamente, así que se cambio su implementación.
+        /// </summary>
+        /// <param name="esqueleto">Contiene el esqueleto sobre el que se trabaja</param>
+        public bool PosicionBasica(Skeleton esqueleto)
+        {
+            bool enPosicion;
 
+            // Primero vamos a controlar la posición de la columna.
+            if (!EspaldaErguida(esqueleto.Joints[JointType.Head], esqueleto.Joints[JointType.ShoulderCenter], esqueleto.Joints[JointType.Spine]))
+            {
+                enPosicion = false;
+                this.feedBack += "\tColóquese Recto.\n";
+            }
+            // Ahora comprobamos las piernas:
+            else if (!piernasAbiertas(esqueleto.Joints[JointType.FootLeft], esqueleto.Joints[JointType.FootRight], esqueleto.Joints[JointType.HipCenter]))
+            {
+                enPosicion = false;
+                this.feedBack += "\tColumna: OK.\n";
+                this.feedBack += "\tAbra las piernas unos 60º\n";
+            }
+            // Por último, vamos a ver los brazos:
+            else if (!brazosEnCruz(esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.ElbowLeft],
+                                    esqueleto.Joints[JointType.WristRight], esqueleto.Joints[JointType.ElbowRight]))
+            {
+                enPosicion = false;
+                this.feedBack += "\tColumna: OK.\n";
+                this.feedBack += "\tPiernas abiertas: OK\n";
+                this.feedBack += "\tColoque los brazos en Cruz.\n";
+            }
+            
+            // Si todo va bien, ponemos a verdadero el valor de retorno:
+            else
+            {
+                enPosicion = true;
+                this.feedBack += "\tColumna: OK.\n";
+                this.feedBack += "\tPiernas abiertas: OK\n";
+                this.feedBack += "\tBrazos en Cruz: OK\n";
+            }
+
+            return enPosicion;
+        }
+
+        /// <summary>
+        /// Método que comprueba si la mano izquierda está sobre la cabeza del esqueleto. Para los cálculos
+        /// se usará la muñeca izquierda, por detectarse con más precisión y estar muy cerca de la mano.
+        /// *BASADO EN MOVIMIENTO 19 y 20 del github: https://github.com/Leontes/Kinect/
+        /// *Se han observado también los github con los movimientos 21 y 22.
+        /// *Modificado para adaptarlo a nuestro ejercicio concreto.
+        /// </summary>
+        /// <param name="RightWrist">Muñeca izquierda del esqueleto </param>
+        /// <param name="Head">Cabeza del esqueleto </param>
+        private bool ManoIzquierdaSobreCabeza(Joint LeftWrist, Joint Head)
+        {
+            bool enPosicion = false;
+
+            // Comprobamos que la mano izquierda se encuentra sobre la cabeza. Para ello, debe cumplirse que la altura
+            // de la muñeca sea algo superior a la de la cabeza (Coordenada Y) y que esté alineada en el eje X.
+            double alturaASuperar = Head.Position.Y * (1.0 - this.tolerancia); // Tenemos que estar por encima de la cabeza
+            // Cuanto más permisivos seamos, menos altura 
+            // habrá que superar. Por tanto, la tolerancia
+            // REDUCE la altura de la cabeza (Posicion Y).
+
+            double XWristSup = LeftWrist.Position.X * (1.0 + this.tolerancia);
+            double XWristInf = LeftWrist.Position.X * (1.0 - this.tolerancia);
+
+            if (LeftWrist.Position.Y > alturaASuperar)
+            {
+                // Ahora la cabeza debe estar alineada con la muñeca en el eje X.
+                if (Head.Position.X >= XWristInf && Head.Position.X <= XWristSup)
+                    enPosicion = true;
+            }
+
+            return enPosicion;
+        }
+
+        /// <summary>
+        /// Método que comprueba si la mano derecha está sobre la cabeza del esqueleto. Para los cálculos
+        /// se usará la muñeca izquierda, por detectarse con más precisión y estar muy cerca de la mano.
+        /// *BASADO EN MOVIMIENTO 19 y 20 del github: https://github.com/Leontes/Kinect/
+        /// *Se han observado también los github con los movimientos 21 y 22.
+        /// *Modificado para adaptarlo a nuestro ejercicio concreto.
+        /// </summary>
+        /// <param name="RightWrist">Muñeca derecha del esqueleto </param>
+        /// <param name="Head">Cabeza del esqueleto </param>
+        private bool ManoDerechaSobreCabeza(Joint RightWrist, Joint Head)
+        {
+            bool enPosicion = false;
+
+            // Comprobamos que la mano dercha se encuentra sobre la cabeza. Para ello, debe cumplirse que la altura
+            // de la muñeca sea algo superior a la de la cabeza (Coordenada Y) y que esté alineada en el eje X.
+            double alturaASuperar = Head.Position.Y * (1.0 - this.tolerancia); // Tenemos que estar por encima de la cabeza
+            // Cuanto más permisivos seamos, menos altura 
+            // habrá que superar. Por tanto, la tolerancia
+            // REDUCE la altura de la cabeza (Posicion Y).
+
+            double XWristSup = RightWrist.Position.X * (1.0 + this.tolerancia);
+            double XWristInf = RightWrist.Position.X * (1.0 - this.tolerancia);
+
+            if (RightWrist.Position.Y > alturaASuperar)
+            {
+                // Ahora la cabeza debe estar alineada con la muñeca en el eje X.
+                if (Head.Position.X >= XWristInf && Head.Position.X <= XWristSup)
+                    enPosicion = true;
+            }
+
+            return enPosicion;
+        }
 
         /// <summary>
         /// Método que comprueba la correcta realización del movimiento.
@@ -244,6 +312,17 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             // El retorno será false a menos que indiquemos lo contrario. Esto se hará solo cuando se haya terminado correctamente el movimiento:
             bool terminadoCorrectamente = false;
 
+            //PRUEBAS:
+            /**************************************************************************** /
+            if (this.ManoIzquierdaSobreCabeza(esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.Head]))
+                terminadoCorrectamente = true;
+
+            /****************************************************************************/
+            if (this.ManoDerechaSobreCabeza(esqueleto.Joints[JointType.WristRight], esqueleto.Joints[JointType.Head]))
+                terminadoCorrectamente = true;
+
+            //DEFINITIVO:
+            /**************************************************************************** /
             // Primero hay que controlar que partimos de la posición inicial:
             if (!posturaBaseFinalizada)
             {
@@ -267,12 +346,13 @@ namespace Microsoft.Samples.Kinect.ColorBasics
                     this.vecesCorrecta = 0;
             }
 
+
             else
             {
                 terminadoCorrectamente = true;
             }
 
-
+            /****************************************************************************/
 
             return terminadoCorrectamente;
         }
