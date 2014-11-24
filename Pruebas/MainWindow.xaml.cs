@@ -396,5 +396,14 @@
             this.controlMovimiento.setTolerancia((double)TolSlider.Value);
         }
 
+        /// <summary>
+        /// Manejador para cuando se pulsa el botón de reinicio:
+        /// <param name="sender">object sending the event</param>
+        /// <param name="e">event arguments</param>
+        private void reStartButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.controlMovimiento.reiniciarMovimiento();
+        }
+
     }
 }

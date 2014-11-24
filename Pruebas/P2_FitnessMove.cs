@@ -23,7 +23,7 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         /// </summary>
         private String feedBack;
 
-        /************************ Fases del Movimiento y Controld de duración ************************/
+        /************************ Fases del Movimiento y Control de duración ************************/
         /// <summary>
         /// Variable que se usa para comprobar si el esqueleto reconocido se ha situado en la posición base
         /// </summary>
@@ -35,7 +35,7 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         private int vecesCorrecta;
 
 
-
+        /************************ Constructores y Métodos básicos de la clase ************************/
         public P2_FitnessMove(double tol = 0.05, int nveces = 10)
         {
             this.tolerancia = tol;
@@ -61,6 +61,12 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         public String getFeedBack()
         {
             return this.feedBack;
+        }
+
+        public void reiniciarMovimiento()
+        {
+            this.posturaBaseFinalizada = false;
+            this.vecesCorrecta = 0;
         }
 
         /************************ Métodos de Comprobación del esqueleto ************************/
