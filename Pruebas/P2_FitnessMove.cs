@@ -23,6 +23,11 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         /// </summary>
         private String feedBack;
 
+        /// <summary>
+        /// Valor que indica cuantas veces hay que hacer el estiramiento:
+        /// </summary>
+        private int repeticiones;
+
         /************************ Fases del Movimiento y Control de duración ************************/
         /// <summary>
         /// Variable que se usa para comprobar si el esqueleto reconocido se ha situado en la posición base
@@ -30,20 +35,41 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         private bool posturaBaseFinalizada;
 
         /// <summary>
+        /// Variable que se usa para comprobar si el esqueleto reconocido se ha estirado hacia la izquierda
+        /// </summary>
+        private bool estiradoIzquierda;
+
+        /// <summary>
+        /// Variable que se usa para comprobar si el esqueleto reconocido se ha estirado hacia la derecha
+        /// </summary>
+        private bool estiradoDerecha;
+
+        /// <summary>
         /// Variable que se usa para comprobar la detección correcta de la postura un cierto número de veces:
         /// </summary>
         private int vecesCorrecta;
 
+        /// <summary>
+        /// Variable que se usa para comprobar cuantas repeticiones se han hecho:
+        /// </summary>
+        private int vecesRepetido;
+
 
         /************************ Constructores y Métodos básicos de la clase ************************/
-        public P2_FitnessMove(double tol = 0.05, int nveces = 10)
+        public P2_FitnessMove(double tol = 0.05, int nveces = 10, int repetir = 1)
         {
             this.tolerancia = tol;
             this.vecesNecesarias = nveces;
+            this.repeticiones = repetir;
 
             // Inicializamos todas las fases a falso, ya que aún no se ha ejecutado ninguna:
             this.posturaBaseFinalizada = false;
+            this.estiradoIzquierda = false;
+            this.estiradoDerecha = false;
+
+            // Y los contadores a 0:
             this.vecesCorrecta = 0;
+            this.vecesRepetido = 0;
             
             this.feedBack = "";
         }
@@ -532,8 +558,29 @@ namespace Microsoft.Samples.Kinect.ColorBasics
                 else
                     this.vecesCorrecta = 0;
             }
+            
+            // Si hemos completado la posición inicial, comprobamos si hemos realizado todas las repeticiones necesarias:
+            else if (this.vecesRepetido < this.repeticiones)
+            {
+                if (!this.estiradoIzquierda)
+                {
 
+                }
+                else if (!this.estiradoDerecha)
+                {
 
+                }
+                    
+                // Si hemos completado la repetición, reiniciamos las condiciones:
+                else
+                {
+                    this.estiradoDerecha = false;
+                    this.estiradoIzquierda = false;
+                }
+
+            }
+            
+            // Si llegamos a este punto es que el movimiento está terminado correctamente:
             else
             {
                 terminadoCorrectamente = true;
