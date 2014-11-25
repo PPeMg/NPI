@@ -347,7 +347,6 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             return enPosicion;
         }
     
-        //NO PROBADOS:
         /// <summary>
         /// Método que comprueba si la mano está recta, apuntando hacia el suelo.
         /// </summary>
@@ -492,25 +491,25 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             bool terminadoCorrectamente = false;
 
             //PRUEBAS:
-            /****************************************************************************/
+            /**************************************************************************** /
             if (this.manoSobreCabeza(esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.Head]))
                 terminadoCorrectamente = true;
 
-            /****************************************************************************/
+            /**************************************************************************** /
             if (this.manoSobreCabeza(esqueleto.Joints[JointType.WristRight], esqueleto.Joints[JointType.Head]))
                 terminadoCorrectamente = true;
 
              
-             /****************************************************************************/
+             /**************************************************************************** /
             if (this.manoAbajo(esqueleto.Joints[JointType.ShoulderLeft],esqueleto.Joints[JointType.ElbowLeft],esqueleto.Joints[JointType.WristLeft]))
                 terminadoCorrectamente = true; 
 
-            /****************************************************************************/
+            /**************************************************************************** /
             if (this.manoEnCadera(esqueleto.Joints[JointType.ElbowLeft],esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.HipLeft]))
                 terminadoCorrectamente = true; 
 
             //DEFINITIVO:
-            /**************************************************************************** /
+            /****************************************************************************/
             // Primero hay que controlar que partimos de la posición inicial:
             if (!posturaBaseFinalizada)
             {
