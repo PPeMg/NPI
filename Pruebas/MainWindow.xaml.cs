@@ -207,9 +207,9 @@
                             if (esq.TrackingState == SkeletonTrackingState.Tracked)
                             {
                                 if (controlMovimiento.movimientoRealizado(esq))
-                                    pintarEsqueleto(esq, Colors.Green, Colors.Violet);
+                                    pintarEsqueleto(esq, Colors.Green, Colors.White);
                                 else
-                                    pintarEsqueleto(esq, Colors.Red, Colors.Violet);
+                                    pintarEsqueleto(esq, Colors.Red, Colors.White);
                             }
                         }
                     }

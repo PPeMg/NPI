@@ -73,17 +73,28 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         /// <summary>
         /// Método que comprueba si el esqueleto tiene la espalda erguida: 
         /// </summary>
-        /// <param name="Head">Cabeza del esqueleto </param>
-        /// <param name="Neck">Cuello del esqueleto </param>
-        /// <param name="Pelvis">Pelvis del esqueleto </param>
+        /// <param name="Shoulder">Cabeza del esqueleto </param>
+        /// <param name="Elbow">Cuello del esqueleto </param>
+        /// <param name="Wrist">Wrist del esqueleto </param>
         private bool EspaldaErguida(Joint Head, Joint Neck, Joint Pelvis)
         {
             bool enPosicion;
 
             // Tenemos que comprobar que la espalda esté recta, lo que se traduce en que cada 
             // articulación de la espalda esté aproximadamente en la misma X y en la misma Z:
-            double topeSuperior = Neck.Position.X * (1.0 + this.tolerancia);
-            double topeInferior = Neck.Position.X * (1.0 - this.tolerancia);
+            double topeSuperior;
+            double topeInferior;
+
+            if ((Neck.Position.X * (1.0 + this.tolerancia)) >= 0)
+            {
+                topeSuperior = Neck.Position.X * (1.0 + this.tolerancia);
+                topeInferior = Neck.Position.X * (1.0 - this.tolerancia);
+            }
+            else
+            {
+                topeSuperior = Neck.Position.X * (1.0 - this.tolerancia);
+                topeInferior = Neck.Position.X * (1.0 + this.tolerancia);
+            }
 
             if (Head.Position.X > topeSuperior || Pelvis.Position.X > topeSuperior)
                 enPosicion = false;
@@ -91,8 +102,16 @@ namespace Microsoft.Samples.Kinect.ColorBasics
                 enPosicion = false;
             else
             {
-                topeSuperior = Neck.Position.Z * (1.0 + this.tolerancia);
-                topeInferior = Neck.Position.Z * (1.0 - this.tolerancia);
+                if ((Neck.Position.Z * (1.0 + this.tolerancia)) >= 0)
+                {
+                    topeSuperior = Neck.Position.Z * (1.0 + this.tolerancia);
+                    topeInferior = Neck.Position.Z * (1.0 - this.tolerancia);
+                }
+                else
+                {
+                    topeSuperior = Neck.Position.Z * (1.0 - this.tolerancia);
+                    topeInferior = Neck.Position.Z * (1.0 + this.tolerancia);
+                }   
 
                 if (Neck.Position.Z > topeSuperior || Pelvis.Position.Z > topeSuperior)
                     enPosicion = false;
@@ -119,9 +138,19 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             // Comprobamos que el brazo izquierdo tiene todas sus articulaciones aproximadamente a la 
             // misma altura (tienen la misma Y). Por cuestiones de precisión se usarán solo el codo y la
             // muñeca.
-            double topeSuperior = LeftWrist.Position.Y * (1.0 + this.tolerancia);
-            double topeInferior = LeftWrist.Position.Y * (1.0 - this.tolerancia);
+            double topeSuperior;
+            double topeInferior;
 
+            if ((LeftWrist.Position.Y * (1.0 + this.tolerancia)) >= 0)
+            {
+                topeSuperior = LeftWrist.Position.Y * (1.0 + this.tolerancia);
+                topeInferior = LeftWrist.Position.Y * (1.0 - this.tolerancia);
+            }
+            else
+            {
+                topeSuperior = LeftWrist.Position.Y * (1.0 - this.tolerancia);
+                topeInferior = LeftWrist.Position.Y * (1.0 + this.tolerancia);
+            }
             if (LeftElbow.Position.Y > topeSuperior)
                 enPosicion = false;
             else if (LeftElbow.Position.Y < topeInferior)
@@ -129,8 +158,16 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             else
             {
                 // Ahora realizamos las mismas operaciones con el otro brazo:
-                topeSuperior = RightWrist.Position.Y * (1.0 + this.tolerancia);
-                topeInferior = RightWrist.Position.Y * (1.0 - this.tolerancia);
+                if ((RightWrist.Position.Y * (1.0 + this.tolerancia)) >= 0)
+                {
+                    topeSuperior = RightWrist.Position.Y * (1.0 + this.tolerancia);
+                    topeInferior = RightWrist.Position.Y * (1.0 - this.tolerancia);
+                }
+                else
+                {
+                    topeSuperior = RightWrist.Position.Y * (1.0 - this.tolerancia);
+                    topeInferior = RightWrist.Position.Y * (1.0 + this.tolerancia);
+                }
 
                 if (RightElbow.Position.Y > topeSuperior)
                     enPosicion = false;
@@ -144,8 +181,9 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         }
 
         /// <summary>
-        /// Método que comprueba si las piernas están abiertas 60º asumiendo que las dos piernas son del mismo tamaño 
-        /// y aplicando una propiedad de los triángulos equiláteros.
+        /// Método que comprueba si las piernas están abiertas más de 30º y menos de 60º (lo que es más o menos
+        /// cómodo para realizar los movimientos.) asumiendo que las dos piernas son del mismo tamaño y 
+        /// aplicando una propiedad de los triángulos equiláteros.
         /// </summary>
         /// <param name="LeftFoot">Pie izquierdo del esqueleto </param>
         /// <param name="RightFoot">Pie derecho del esqueleto </param>
@@ -178,9 +216,9 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             double tamPiernas = Math.Sqrt(x + y + z);
 
             // Comprobamos que sean iguales aproximadamente, aplicando la tolerancia:
-            if ((tamPiernas * (1.0 + this.tolerancia)) == distanciaPies)
+            if (distanciaPies < (tamPiernas/2 * (1.0 - this.tolerancia)))
                 enPosicion = false;
-            else if ((tamPiernas * (1.0 - this.tolerancia)) == distanciaPies)
+            else if (distanciaPies > (tamPiernas * (1.0 + this.tolerancia)))
                 enPosicion = false;
             else
                 enPosicion = true;
@@ -237,32 +275,127 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         }
 
         /// <summary>
-        /// Método que comprueba si la mano izquierda está sobre la cabeza del esqueleto. Para los cálculos
+        /// Método que comprueba si la mano indicada está sobre la cabeza del esqueleto. Para los cálculos
         /// se usará la muñeca izquierda, por detectarse con más precisión y estar muy cerca de la mano.
         /// *BASADO EN MOVIMIENTO 19 y 20 del github: https://github.com/Leontes/Kinect/
         /// *Se han observado también los github con los movimientos 21 y 22.
         /// *Modificado para adaptarlo a nuestro ejercicio concreto.
         /// </summary>
-        /// <param name="RightWrist">Muñeca izquierda del esqueleto </param>
+        /// <param name="Wrist">Muñeca izquierda del esqueleto </param>
         /// <param name="Head">Cabeza del esqueleto </param>
-        private bool ManoIzquierdaSobreCabeza(Joint LeftWrist, Joint Head)
+        private bool manoSobreCabeza(Joint Wrist, Joint Head)
         {
             bool enPosicion = false;
 
             // Comprobamos que la mano izquierda se encuentra sobre la cabeza. Para ello, debe cumplirse que la altura
             // de la muñeca sea algo superior a la de la cabeza (Coordenada Y) y que esté alineada en el eje X.
-            double alturaASuperar = Head.Position.Y * (1.0 - this.tolerancia); // Tenemos que estar por encima de la cabeza
+            double alturaASuperar;
+
+            // Tenemos que estar por encima de la cabeza           
             // Cuanto más permisivos seamos, menos altura 
             // habrá que superar. Por tanto, la tolerancia
             // REDUCE la altura de la cabeza (Posicion Y).
-
-            double XWristSup = LeftWrist.Position.X * (1.0 + this.tolerancia);
-            double XWristInf = LeftWrist.Position.X * (1.0 - this.tolerancia);
-
-            if (LeftWrist.Position.Y > alturaASuperar)
+            if ((Head.Position.Y * (1.0 - this.tolerancia)) >= 0)
             {
-                // Ahora la cabeza debe estar alineada con la muñeca en el eje X.
-                if (Head.Position.X >= XWristInf && Head.Position.X <= XWristSup)
+                alturaASuperar = Head.Position.Y * (1.0 - this.tolerancia);
+            }
+            else
+            {
+                alturaASuperar = Head.Position.Y * (1.0 + this.tolerancia);
+            }
+
+            double XHead;
+
+            if (Wrist.JointType == JointType.WristLeft)
+            {
+                if ((Head.Position.X * (1.0 - this.tolerancia)) >= 0)
+                {
+                    XHead = Head.Position.X * (1.0 - this.tolerancia);
+                }
+                else
+                {
+                    XHead = Head.Position.X * (1.0 + this.tolerancia);
+                }
+            }
+            else
+            {
+                if ((Head.Position.X * (1.0 - this.tolerancia)) >= 0)
+                {
+                    XHead = Head.Position.X * (1.0 + this.tolerancia);
+                }
+                else
+                {
+                    XHead = Head.Position.X * (1.0 - this.tolerancia);
+                }
+            }
+
+            if (Wrist.Position.Y > alturaASuperar)
+            {
+                // Ahora, la mano debe haber sobrepasado la cabeza en el eje X:
+                if (Wrist.JointType == JointType.WristLeft)
+                {
+                    if (Wrist.Position.X >= XHead)
+                        enPosicion = true;
+
+                }
+                else
+                {
+                    if (Wrist.Position.X <= XHead)
+                        enPosicion = true;
+                }
+            }
+            return enPosicion;
+        }
+    
+        //NO PROBADOS:
+        /// <summary>
+        /// Método que comprueba si la mano está recta, apuntando hacia el suelo.
+        /// </summary>
+        /// <param name="Shoulder">Hombro del brazo que queremos comprobar </param>
+        /// <param name="Elbow">Codo del brazo que queremos comprobar </param>
+        /// <param name="Wrist">Muñeca del brazo que queremos comprobar </param>
+        private bool manoAbajo(Joint Shoulder, Joint Elbow, Joint Wrist)
+        {
+            bool enPosicion;
+
+            // Tenemos que comprobar que la espalda esté recta, lo que se traduce en que cada 
+            // articulación de la espalda esté aproximadamente en la misma X y en la misma Z:
+            double topeSuperior;
+            double topeInferior;
+
+            if ((Elbow.Position.X * (1.0 + this.tolerancia)) >= 0)
+            {
+                topeSuperior = Elbow.Position.X * (1.0 + this.tolerancia);
+                topeInferior = Elbow.Position.X * (1.0 - this.tolerancia);
+            }
+            else
+            {
+                topeSuperior = Elbow.Position.X * (1.0 - this.tolerancia);
+                topeInferior = Elbow.Position.X * (1.0 + this.tolerancia);
+            }
+
+            if (Shoulder.Position.X > topeSuperior || Wrist.Position.X > topeSuperior)
+                enPosicion = false;
+            else if (Shoulder.Position.X < topeInferior || Wrist.Position.X < topeInferior)
+                enPosicion = false;
+            else
+            {
+                if ((Elbow.Position.Z * (1.0 + this.tolerancia)) >= 0)
+                {
+                    topeSuperior = Elbow.Position.Z * (1.0 + this.tolerancia);
+                    topeInferior = Elbow.Position.Z * (1.0 - this.tolerancia);
+                }
+                else
+                {
+                    topeSuperior = Elbow.Position.Z * (1.0 - this.tolerancia);
+                    topeInferior = Elbow.Position.Z * (1.0 + this.tolerancia);
+                }
+
+                if (Elbow.Position.Z > topeSuperior || Wrist.Position.Z > topeSuperior)
+                    enPosicion = false;
+                else if (Elbow.Position.Z < topeInferior || Wrist.Position.Z < topeInferior)
+                    enPosicion = false;
+                else
                     enPosicion = true;
             }
 
@@ -270,33 +403,79 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         }
 
         /// <summary>
-        /// Método que comprueba si la mano derecha está sobre la cabeza del esqueleto. Para los cálculos
-        /// se usará la muñeca izquierda, por detectarse con más precisión y estar muy cerca de la mano.
-        /// *BASADO EN MOVIMIENTO 19 y 20 del github: https://github.com/Leontes/Kinect/
-        /// *Se han observado también los github con los movimientos 21 y 22.
-        /// *Modificado para adaptarlo a nuestro ejercicio concreto.
+        /// Método que comprueba si el brazo está en arco, con la mano está apoyada en la cadera
         /// </summary>
-        /// <param name="RightWrist">Muñeca derecha del esqueleto </param>
-        /// <param name="Head">Cabeza del esqueleto </param>
-        private bool ManoDerechaSobreCabeza(Joint RightWrist, Joint Head)
+        /// <param name="Elbow">Codo del brazo que queremos comprobar </param>
+        /// <param name="Wrist">Muñeca del brazo que queremos comprobar </param>
+        /// <param name="Hip">Cadera del esqueleto </param>
+        private bool manoEnCadera(Joint Elbow, Joint Wrist, Joint Hip)
         {
             bool enPosicion = false;
 
-            // Comprobamos que la mano dercha se encuentra sobre la cabeza. Para ello, debe cumplirse que la altura
-            // de la muñeca sea algo superior a la de la cabeza (Coordenada Y) y que esté alineada en el eje X.
-            double alturaASuperar = Head.Position.Y * (1.0 - this.tolerancia); // Tenemos que estar por encima de la cabeza
-            // Cuanto más permisivos seamos, menos altura 
-            // habrá que superar. Por tanto, la tolerancia
-            // REDUCE la altura de la cabeza (Posicion Y).
-
-            double XWristSup = RightWrist.Position.X * (1.0 + this.tolerancia);
-            double XWristInf = RightWrist.Position.X * (1.0 - this.tolerancia);
-
-            if (RightWrist.Position.Y > alturaASuperar)
+            // Tenemos que comprobar que la posición de la muñeca esté junto a la cadera. Para
+            // ello ha de tener las mismas coordenadas en Z y en Y. La X debe ser similar también.
+            // Para calcular una X aproximada, yo he utilizado la distancia de la muñeca al codo, de
+            // forma que dependiendo de lo cerca que esté la persona y sus proporciones, varíe el margen.
+            double topeSuperior;
+            double topeInferior;
+            
+            if ((Wrist.Position.X * (1.0 + this.tolerancia)) >= 0)
             {
-                // Ahora la cabeza debe estar alineada con la muñeca en el eje X.
-                if (Head.Position.X >= XWristInf && Head.Position.X <= XWristSup)
-                    enPosicion = true;
+                topeSuperior = Wrist.Position.X * (1.0 + this.tolerancia);
+                topeInferior = Wrist.Position.X * (1.0 - this.tolerancia);
+            }
+            else
+            {
+                topeInferior = Wrist.Position.X * (1.0 + this.tolerancia);
+                topeSuperior = Wrist.Position.X * (1.0 - this.tolerancia);
+            }
+            double x = (double) (Elbow.Position.X - Wrist.Position.X);
+            double y = (double) (Elbow.Position.Y - Wrist.Position.Y);
+            double z = (double) (Elbow.Position.Z - Wrist.Position.Z);
+
+            x = x * x;
+            y = y * y;
+            z = z * z;
+
+            double margenCadera = Math.Sqrt(x + y + z);
+
+            this.feedBack += string.Format("X Muñeca: X:{0:0.00} / Y:{1:0.00} \n", topeSuperior, topeInferior);
+            this.feedBack += string.Format("X Cadera: X:{0:0.00} \n", Hip.Position.X);
+            this.feedBack += string.Format("Margen y +/-Margen: X:{0:0.00} / Y:{1:0.00} / Z:{2:0.00} \n", margenCadera, (topeSuperior + margenCadera), (topeInferior - margenCadera));
+
+            if (Hip.Position.X < (topeSuperior + margenCadera) && Hip.Position.X > (topeInferior - margenCadera))
+            {
+                if ((Wrist.Position.Y * (1.0 + this.tolerancia)) >= 0)
+                {
+                    topeSuperior = Wrist.Position.Y * (1.0 + this.tolerancia);
+                    topeInferior = Wrist.Position.Y * (1.0 - this.tolerancia);
+                }
+                else
+                {
+                    topeInferior = Wrist.Position.Y * (1.0 + this.tolerancia);
+                    topeSuperior = Wrist.Position.Y * (1.0 - this.tolerancia);
+                }
+
+                this.feedBack += string.Format("Y Muñeca: X:{0:0.00} / Y:{1:0.00} \n", topeSuperior, topeInferior);
+                this.feedBack += string.Format("Y Cadera: X:{0:0.00} \n", Hip.Position.Y);
+
+                if (Hip.Position.Y <= topeSuperior && Hip.Position.Y >= topeInferior)
+                {
+                    if ((Wrist.Position.Z * (1.0 + this.tolerancia)) >= 0)
+                    {
+                        topeSuperior = Wrist.Position.Z * (1.0 + this.tolerancia);
+                        topeInferior = Wrist.Position.Z * (1.0 - this.tolerancia);
+                    }
+                    else
+                    {
+                        topeInferior = Wrist.Position.Z * (1.0 + this.tolerancia);
+                        topeSuperior = Wrist.Position.Z * (1.0 - this.tolerancia);
+                    }
+
+                    if (Hip.Position.Z <= topeSuperior && Hip.Position.Z >= topeInferior)
+                        enPosicion = true;
+                }
+                    
             }
 
             return enPosicion;
@@ -313,13 +492,22 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             bool terminadoCorrectamente = false;
 
             //PRUEBAS:
-            /**************************************************************************** /
-            if (this.ManoIzquierdaSobreCabeza(esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.Head]))
+            /****************************************************************************/
+            if (this.manoSobreCabeza(esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.Head]))
                 terminadoCorrectamente = true;
 
             /****************************************************************************/
-            if (this.ManoDerechaSobreCabeza(esqueleto.Joints[JointType.WristRight], esqueleto.Joints[JointType.Head]))
+            if (this.manoSobreCabeza(esqueleto.Joints[JointType.WristRight], esqueleto.Joints[JointType.Head]))
                 terminadoCorrectamente = true;
+
+             
+             /****************************************************************************/
+            if (this.manoAbajo(esqueleto.Joints[JointType.ShoulderLeft],esqueleto.Joints[JointType.ElbowLeft],esqueleto.Joints[JointType.WristLeft]))
+                terminadoCorrectamente = true; 
+
+            /****************************************************************************/
+            if (this.manoEnCadera(esqueleto.Joints[JointType.ElbowLeft],esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.HipLeft]))
+                terminadoCorrectamente = true; 
 
             //DEFINITIVO:
             /**************************************************************************** /
