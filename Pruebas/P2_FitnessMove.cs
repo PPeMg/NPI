@@ -92,7 +92,11 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         public void reiniciarMovimiento()
         {
             this.posturaBaseFinalizada = false;
+            this.estiradoIzquierda = false;
+            this.estiradoDerecha = false;
+
             this.vecesCorrecta = 0;
+            this.vecesRepetido = 0;
         }
 
         /************************ Métodos de Comprobación del esqueleto ************************/
@@ -100,7 +104,7 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         /// Método que comprueba si el esqueleto tiene la espalda erguida: 
         /// </summary>
         /// <param name="Shoulder">Cabeza del esqueleto </param>
-        /// <param name="Elbow">Cuello del esqueleto </param>
+        /// <param name="RightHip">Cuello del esqueleto </param>
         /// <param name="Wrist">Wrist del esqueleto </param>
         private bool EspaldaErguida(Joint Head, Joint Neck, Joint Pelvis)
         {
@@ -213,7 +217,7 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         /// </summary>
         /// <param name="LeftFoot">Pie izquierdo del esqueleto </param>
         /// <param name="RightFoot">Pie derecho del esqueleto </param>
-        /// <param name="Hip">Cadera del esqueleto </param>
+        /// <param name="LeftHip">Cadera del esqueleto </param>
         private bool piernasAbiertas(Joint LeftFoot, Joint RightFoot, Joint Hip)
         {
             bool enPosicion;
@@ -377,7 +381,7 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         /// Método que comprueba si la mano está recta, apuntando hacia el suelo.
         /// </summary>
         /// <param name="Shoulder">Hombro del brazo que queremos comprobar </param>
-        /// <param name="Elbow">Codo del brazo que queremos comprobar </param>
+        /// <param name="RightHip">Codo del brazo que queremos comprobar </param>
         /// <param name="Wrist">Muñeca del brazo que queremos comprobar </param>
         private bool manoAbajo(Joint Shoulder, Joint Elbow, Joint Wrist)
         {
@@ -430,78 +434,47 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         /// <summary>
         /// Método que comprueba si el brazo está en arco, con la mano está apoyada en la cadera
         /// </summary>
-        /// <param name="Elbow">Codo del brazo que queremos comprobar </param>
         /// <param name="Wrist">Muñeca del brazo que queremos comprobar </param>
-        /// <param name="Hip">Cadera del esqueleto </param>
-        private bool manoEnCadera(Joint Elbow, Joint Wrist, Joint Hip)
+        /// <param name="LeftHip">Cadera izquierda del esqueleto </param>
+        /// <param name="RightHip">Cadera derecha del esqueleto </param>
+        private bool manoEnCadera(Joint Wrist, Joint LeftHip, Joint RightHip)
         {
             bool enPosicion = false;
 
             // Tenemos que comprobar que la posición de la muñeca esté junto a la cadera. Para
-            // ello ha de tener las mismas coordenadas en Z y en Y. La X debe ser similar también.
-            // Para calcular una X aproximada, yo he utilizado la distancia de la muñeca al codo, de
-            // forma que dependiendo de lo cerca que esté la persona y sus proporciones, varíe el margen.
-            double topeSuperior;
-            double topeInferior;
-            
-            if ((Wrist.Position.X * (1.0 + this.tolerancia)) >= 0)
-            {
-                topeSuperior = Wrist.Position.X * (1.0 + this.tolerancia);
-                topeInferior = Wrist.Position.X * (1.0 - this.tolerancia);
-            }
-            else
-            {
-                topeInferior = Wrist.Position.X * (1.0 + this.tolerancia);
-                topeSuperior = Wrist.Position.X * (1.0 - this.tolerancia);
-            }
-            double x = (double) (Elbow.Position.X - Wrist.Position.X);
-            double y = (double) (Elbow.Position.Y - Wrist.Position.Y);
-            double z = (double) (Elbow.Position.Z - Wrist.Position.Z);
+            // ello he calculado la distancia entre los dos muslos. La muñeca ha de estar a una 
+            // distancia igual o menor al doble, para obtener una distancia que se adapte a cada persona.
+            double x = (double)(RightHip.Position.X - LeftHip.Position.X);
+            double y = (double)(RightHip.Position.Y - LeftHip.Position.Y);
+            double z = (double)(RightHip.Position.Z - LeftHip.Position.Z);
 
             x = x * x;
             y = y * y;
             z = z * z;
 
-            double margenCadera = Math.Sqrt(x + y + z);
+            double margenCadera = 2*Math.Sqrt(x + y + z);
 
-            this.feedBack += string.Format("X Muñeca: X:{0:0.00} / Y:{1:0.00} \n", topeSuperior, topeInferior);
-            this.feedBack += string.Format("X Cadera: X:{0:0.00} \n", Hip.Position.X);
-            this.feedBack += string.Format("Margen y +/-Margen: X:{0:0.00} / Y:{1:0.00} / Z:{2:0.00} \n", margenCadera, (topeSuperior + margenCadera), (topeInferior - margenCadera));
-
-            if (Hip.Position.X < (topeSuperior + margenCadera) && Hip.Position.X > (topeInferior - margenCadera))
+            if (Wrist.JointType == JointType.WristLeft)
             {
-                if ((Wrist.Position.Y * (1.0 + this.tolerancia)) >= 0)
-                {
-                    topeSuperior = Wrist.Position.Y * (1.0 + this.tolerancia);
-                    topeInferior = Wrist.Position.Y * (1.0 - this.tolerancia);
-                }
-                else
-                {
-                    topeInferior = Wrist.Position.Y * (1.0 + this.tolerancia);
-                    topeSuperior = Wrist.Position.Y * (1.0 - this.tolerancia);
-                }
-
-                this.feedBack += string.Format("Y Muñeca: X:{0:0.00} / Y:{1:0.00} \n", topeSuperior, topeInferior);
-                this.feedBack += string.Format("Y Cadera: X:{0:0.00} \n", Hip.Position.Y);
-
-                if (Hip.Position.Y <= topeSuperior && Hip.Position.Y >= topeInferior)
-                {
-                    if ((Wrist.Position.Z * (1.0 + this.tolerancia)) >= 0)
-                    {
-                        topeSuperior = Wrist.Position.Z * (1.0 + this.tolerancia);
-                        topeInferior = Wrist.Position.Z * (1.0 - this.tolerancia);
-                    }
-                    else
-                    {
-                        topeInferior = Wrist.Position.Z * (1.0 + this.tolerancia);
-                        topeSuperior = Wrist.Position.Z * (1.0 - this.tolerancia);
-                    }
-
-                    if (Hip.Position.Z <= topeSuperior && Hip.Position.Z >= topeInferior)
-                        enPosicion = true;
-                }
-                    
+                x = (double)(LeftHip.Position.X - Wrist.Position.X);
+                y = (double)(LeftHip.Position.Y - Wrist.Position.Y);
+                z = (double)(LeftHip.Position.Z - Wrist.Position.Z);
             }
+            else
+            {
+                x = (double)(RightHip.Position.X - Wrist.Position.X);
+                y = (double)(RightHip.Position.Y - Wrist.Position.Y);
+                z = (double)(RightHip.Position.Z - Wrist.Position.Z);
+            }
+
+            x = x * x;
+            y = y * y;
+            z = z * z;
+
+            double distanciaManoCadera = Math.Sqrt(x + y + z);
+
+            if((margenCadera*(1.0 + this.tolerancia) > distanciaManoCadera))
+                enPosicion = true;
 
             return enPosicion;
         }
@@ -531,7 +504,7 @@ namespace Microsoft.Samples.Kinect.ColorBasics
                 terminadoCorrectamente = true; 
 
             /**************************************************************************** /
-            if (this.manoEnCadera(esqueleto.Joints[JointType.ElbowLeft],esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.HipLeft]))
+            if (this.manoEnCadera(esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.HipLeft], esqueleto.Joints[JointType.HipRight]))
                 terminadoCorrectamente = true; 
 
             //DEFINITIVO:
@@ -540,14 +513,16 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             if (!posturaBaseFinalizada)
             {
                 // Si no se ha establecido aún, comprobamos si está en la posición básica:
-                if(this.PosicionBasica(esqueleto)){
+                if(this.PosicionBasica(esqueleto))
+                {
                     this.vecesCorrecta ++;
 
                     // Si se ha mantenido el tiempo suficiente, ponemos a true la variable que comprueba que se ha 
                     // terminado correctamente esta fase:
                     if (this.vecesCorrecta >= this.vecesNecesarias)
                     {
-                        posturaBaseFinalizada = true;
+                        this.posturaBaseFinalizada = true;
+                        this.vecesCorrecta = 0;
                         this.feedBack += "\nPosición Básica correcta.\n";
                     }
                     else
@@ -562,13 +537,77 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             // Si hemos completado la posición inicial, comprobamos si hemos realizado todas las repeticiones necesarias:
             else if (this.vecesRepetido < this.repeticiones)
             {
+                // Primero hay que realizar el estiramiento hacia la izquierda.
                 if (!this.estiradoIzquierda)
                 {
+                    // Si no se ha establecido aún, comprobamos si está en dicha posición. Para ello, primero comprobamos
+                    // si tiene la mano izquierda en la cadera:
+                    if (this.manoEnCadera(esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.HipLeft], esqueleto.Joints[JointType.HipRight]))
+                    {
+                        // Ahora comprobamos que la mano derecha esté encima de la cabeza.
+                        if(this.manoSobreCabeza(esqueleto.Joints[JointType.WristRight], esqueleto.Joints[JointType.Head])){
+                            this.vecesCorrecta++;
 
+                            // Si se ha mantenido el tiempo suficiente, ponemos a true la variable que comprueba que se ha 
+                            // terminado correctamente esta fase:
+                            if (this.vecesCorrecta >= this.vecesNecesarias)
+                            {
+                                this.estiradoIzquierda = true;
+                                this.vecesCorrecta = 0;
+                                this.feedBack += "\nPosición Estirado Izquierda correctamente.\n";
+                            }
+                            else
+                                this.feedBack += "\nPosición Estirado Izquierda: " + this.vecesCorrecta + "\n";
+                        }
+                        else
+                        {
+                            this.feedBack += "\nColoque la mano derecha sobre su cabeza.\n";
+                            this.vecesCorrecta = 0;
+                        }
+                    }
+
+                    // Si aún no hemos alcanzado la posición de estiramiento, reiniciamos el acumulador:
+                    else
+                    {
+                        this.feedBack += "\nColoque la mano izquierda apoyada en su cadera.\n";
+                        this.vecesCorrecta = 0;
+                    }
                 }
                 else if (!this.estiradoDerecha)
                 {
+                    // Si no se ha establecido aún, comprobamos si está en dicha posición. Para ello, primero comprobamos
+                    // si tiene la mano derecha en la cadera:
+                    if (this.manoEnCadera(esqueleto.Joints[JointType.WristRight], esqueleto.Joints[JointType.HipLeft], esqueleto.Joints[JointType.HipRight]))
+                    {
+                        // Ahora comprobamos que la mano izquierda esté encima de la cabeza.
+                        if (this.manoSobreCabeza(esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.Head]))
+                        {
+                            this.vecesCorrecta++;
 
+                            // Si se ha mantenido el tiempo suficiente, ponemos a true la variable que comprueba que se ha 
+                            // terminado correctamente esta fase:
+                            if (this.vecesCorrecta >= this.vecesNecesarias)
+                            {
+                                this.estiradoDerecha = true;
+                                this.vecesCorrecta = 0;
+                                this.feedBack += "\nPosición Estirado Derecha correctamente.\n";
+                            }
+                            else
+                                this.feedBack += "\nPosición Estirado Derecha: " + this.vecesCorrecta + "\n";
+                        }
+                        else
+                        {
+                            this.feedBack += "\nColoque la mano izquierda sobre su cabeza.\n";
+                            this.vecesCorrecta = 0;
+                        }
+                    }
+
+                    // Si aún no hemos alcanzado la posición de estiramiento, reiniciamos el acumulador:
+                    else
+                    {
+                        this.feedBack += "\nColoque la mano derecha apoyada en su cadera.\n";
+                        this.vecesCorrecta = 0;
+                    }
                 }
                     
                 // Si hemos completado la repetición, reiniciamos las condiciones:
@@ -576,6 +615,7 @@ namespace Microsoft.Samples.Kinect.ColorBasics
                 {
                     this.estiradoDerecha = false;
                     this.estiradoIzquierda = false;
+                    this.vecesRepetido++;
                 }
 
             }
@@ -583,6 +623,7 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             // Si llegamos a este punto es que el movimiento está terminado correctamente:
             else
             {
+                this.feedBack += "\n¡¡¡EJERCICIO TERMINADO!!!\n";
                 terminadoCorrectamente = true;
             }
 
