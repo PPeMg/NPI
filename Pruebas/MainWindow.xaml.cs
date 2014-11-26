@@ -226,10 +226,13 @@
                             // Si todo el esqueleto está siendo detectado (TRACKED)
                             if (esq.TrackingState == SkeletonTrackingState.Tracked)
                             {
+                                // Si es correcto:
                                 if (controlMovimiento.movimientoRealizado(esq))
-                                    pintarEsqueleto(esq, Colors.Green, Colors.White);
+                                    pintarEsqueleto(esq, Colors.Green, Colors.Yellow);
+
+                                // Si no lo es:
                                 else
-                                    pintarEsqueleto(esq, Colors.Red, Colors.White);
+                                    pintarEsqueleto(esq, Colors.Red, Colors.SteelBlue);
                             }
                         }
                     }
@@ -370,7 +373,7 @@
 
             if ((bool)this.SkeletonCheckbox.IsChecked)
             {
-                //Buscar forma de hacer captura del esqueleto. Mientras:
+                /*****************Buscar forma de hacer captura del esqueleto. Mientras:*****************/
                 // Añadimos el la imagen actual del flujo al codificador.
                 encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
             }

@@ -509,26 +509,6 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             // El retorno será false a menos que indiquemos lo contrario. Esto se hará solo cuando se haya terminado correctamente el movimiento:
             bool terminadoCorrectamente = false;
 
-            //PRUEBAS:
-            /**************************************************************************** /
-            if (this.manoSobreCabeza(esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.Head]))
-                terminadoCorrectamente = true;
-
-            /**************************************************************************** /
-            if (this.manoSobreCabeza(esqueleto.Joints[JointType.WristRight], esqueleto.Joints[JointType.Head]))
-                terminadoCorrectamente = true;
-
-             
-             /**************************************************************************** /
-            if (this.manoAbajo(esqueleto.Joints[JointType.ShoulderLeft],esqueleto.Joints[JointType.ElbowLeft],esqueleto.Joints[JointType.WristLeft]))
-                terminadoCorrectamente = true; 
-
-            /**************************************************************************** /
-            if (this.manoEnCadera(esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.HipLeft], esqueleto.Joints[JointType.HipRight]))
-                terminadoCorrectamente = true; 
-
-            //DEFINITIVO:
-            /****************************************************************************/
             // Primero hay que controlar que partimos de la posición inicial:
             if (!posturaBaseFinalizada)
             {
@@ -646,8 +626,6 @@ namespace Microsoft.Samples.Kinect.ColorBasics
                 this.feedBack += "\n¡¡¡EJERCICIO TERMINADO!!!\n";
                 terminadoCorrectamente = true;
             }
-
-            /****************************************************************************/
 
             return terminadoCorrectamente;
         }
