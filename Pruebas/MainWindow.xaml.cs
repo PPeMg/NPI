@@ -32,15 +32,20 @@
         private byte[] colorPixels;
 
         /// <summary>
-        /// Objeto que controla las posturas a realizar:
-        /// </summary>
-        private P2_FitnessMove controlMovimiento = new P2_FitnessMove();
-
-        /// <summary>
         /// Esta variable almacenará un booleano que nos servirá para hacer más eficiente el proceso de
         /// activar y desactivar el modo esqueleto:
         /// </summary>
         private bool cambioModoEsqueleto = false;
+
+        /// <summary>
+        /// Esta variable almacenará el número de veces que hay que repetir el ejercicio completo.
+        /// </summary>
+        private int repeticionesNecesarias = 1;
+
+        /// <summary>
+        /// Objeto que controla las posturas a realizar:
+        /// </summary>
+        private P2_FitnessMove controlMovimiento = new P2_FitnessMove(0.05, 10, 1);
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -169,10 +174,25 @@
         {
             // Creamos un string para mostrar la tolerancia por pantalla:
             int tol = (int)(this.controlMovimiento.getTolerancia() * 100);
-            string mensaje = "Tolerancia = " + tol + "%";
+            string mensajeTol = "Tolerancia = " + tol + "%";
+            this.toleranciaTexBlock.Text = mensajeTol;
+
+            // Creamos un string para mostrar el feedback:
             string mensajeFeedback = this.controlMovimiento.getFeedBack();
-            this.toleranciaTexBlock.Text = mensaje;
             this.FeedbackTexBlock.Text = mensajeFeedback;
+
+            // Creamos un string para mostrar las repeticiones del movimiento:
+            int rep = this.repeticionesNecesarias;
+            string mensajeRepAct = "Repeticiones = " + this.controlMovimiento.getRepeticiones();
+            string mensajeRep = "" + rep;
+            this.repeticionesTexBlock.Text = mensajeRep;
+            this.repeticionesActualesTexBlock.Text = mensajeRepAct;
+
+            // Creamos un string para mostrar la duración de las posturas:
+            int dur = this.controlMovimiento.getDuracion();
+            string mensajeDuracion = "Duración = " + dur;
+            this.duracionTexBlock.Text = mensajeDuracion;
+
 
             //Comprobamos si está activado el checkbox de Esqueleto. Si no lo está, no mostramos el esqueleto:
             if ((bool)SkeletonCheckbox.IsChecked)
@@ -403,6 +423,45 @@
         private void reStartButton_Click(object sender, RoutedEventArgs e)
         {
             this.controlMovimiento.reiniciarMovimiento();
+        }
+
+        /// <summary>
+        /// Manejador para cuando cambie el valor de la duración de las posturas:
+        /// <param name="sender">object sending the event</param>
+        /// <param name="e">event arguments</param>
+        private void DurationSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            // Modificamos la duración necesaria para que una postura sea aceptada. Para ello usamos el valor del slider.
+            this.controlMovimiento.setDuracion((int)DurationSlider.Value);
+        }
+
+        /// <summary>
+        /// Manejador para cuando cuando se pulsa el botón "+1"
+        /// <param name="sender">object sending the event</param>
+        /// <param name="e">event arguments</param>
+        private void AddRepeticion_Click(object sender, RoutedEventArgs e)
+        {
+            this.repeticionesNecesarias++;
+        }
+
+        /// <summary>
+        /// Manejador para cuando cuando se pulsa el botón "-1"
+        /// <param name="sender">object sending the event</param>
+        /// <param name="e">event arguments</param>
+        private void SubRepeticion_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.repeticionesNecesarias > 0)
+                this.repeticionesNecesarias--;
+        }
+
+        /// <summary>
+        /// Manejador para cuando cuando se pulsa el botón "Establecer"
+        /// <param name="sender">object sending the event</param>
+        /// <param name="e">event arguments</param>
+        private void SetRepeticion_Click(object sender, RoutedEventArgs e)
+        {
+            this.controlMovimiento.setRepeticiones(this.repeticionesNecesarias);
+            this.repeticionesNecesarias = 1;
         }
 
     }

@@ -39,13 +39,13 @@
     <Grid Name="layoutGrid" Margin="10 0 10 0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="538*"/>
-            <RowDefinition Height="65"/>
+            <RowDefinition Height="519*"/>
+            <RowDefinition Height="84"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <DockPanel Grid.Row="0" Margin="0 0 0 20">
             <Image DockPanel.Dock="Left" Source="Images\Logo.png" Stretch="Fill" Height="32" Width="81" Margin="0 10 0 5"/>
-            <TextBlock DockPanel.Dock="Right" Margin="0 0 -1 0" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18">Prueba Kinect</TextBlock>
+            <TextBlock DockPanel.Dock="Right" Margin="0 0 -1 0" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18" TextWrapping="WrapWithOverflow">Prueba Kinect</TextBlock>
             <Image Source="Images\Status.png" Stretch="None" HorizontalAlignment="Center" Margin="0 0 0 5"/>
         </DockPanel>
         <Viewbox Stretch="Uniform" HorizontalAlignment="Center" Height="551" VerticalAlignment="Bottom" Margin="34,0" Grid.Row="1">
@@ -53,18 +53,29 @@
         </Viewbox>
         <Button Grid.Row="2" Style="{StaticResource SnapshotButton}" Content="Capturar Imagen" Height="Auto" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10 10 0 10" Name="buttonScreenshot" Click="ButtonScreenshotClick" />
         <!-- Control de Tolerancia:-->
-        <Slider Grid.Row="2" Height="23" HorizontalAlignment="Left" Maximum="0.50" Minimum="0.00" Margin="211,14,0,0" Name="TolSlider" VerticalAlignment="Top" Width="175" ValueChanged="TolSlider_ValueChanged" />
+        <Slider Grid.Row="2" Height="23" HorizontalAlignment="Left" Maximum="0.50" Minimum="0.00" Margin="211,35,0,0" Name="TolSlider" VerticalAlignment="Top" Width="175" ValueChanged="TolSlider_ValueChanged" />
+        <!-- Control de Duración de Postura:-->
+        <Slider Grid.Row="2" Height="23" HorizontalAlignment="Left" Maximum="30" Minimum="5" Margin="703,35,0,0" Name="DurationSlider" VerticalAlignment="Top" Width="175" ValueChanged="DurationSlider_ValueChanged" />
         <!-- Botón para reiniciar la detección del movimiento-->
         <Button Content="Reiniciar Movimiento" Grid.Row="2" Height="27" HorizontalAlignment="Left" Margin="25,17,0,0" Name="reStartButton" VerticalAlignment="Top" Width="123" Click="reStartButton_Click" />
         <!-- Pintar Esqueleto o no:-->
-        <CheckBox Content="Activar Esqueleto" Grid.Row="2" Height="16" HorizontalAlignment="Left" Margin="418,14,0,0" Name="SkeletonCheckbox" VerticalAlignment="Top" IsChecked="True" />
+        <CheckBox Content="Activar Esqueleto" Grid.Row="2" Height="16" HorizontalAlignment="Left" Margin="401,14,0,0" Name="SkeletonCheckbox" VerticalAlignment="Top" IsChecked="True" />
         <StatusBar Grid.Row="3" HorizontalAlignment="Stretch" Name="statusBar" VerticalAlignment="Bottom" Background="White" Foreground="{StaticResource MediumGreyBrush}">
             <StatusBarItem Padding="0 0 0 10">
                 <TextBlock Name="textoEstadoKinect" Margin="-1 0 0 0">Pulsar el botón para realizar captura de pantalla.</TextBlock>
             </StatusBarItem>
         </StatusBar>
+        <!-- Canvas sobre el que pintar el esqueleto:-->
         <Canvas Name="canvasSalidaKinect" Width="640" Height="480" Margin="35,12,204,46" Grid.Row="1" />
-        <TextBlock Grid.Row="2" Height="23" HorizontalAlignment="Left" Margin="211,42,0,0" Name="toleranciaTexBlock" Text="Tolerancia = " VerticalAlignment="Top" Width="175" />
-        <TextBlock Grid.Row="1" Height="229" HorizontalAlignment="Right" Margin="0,25,75,0" Name="FeedbackTexBlock" Text="Información" VerticalAlignment="Top" FontSize="16" />
+        <!-- Texblock para mostrar distinta información, como el feedback y el valor de la tolerancia actual:-->
+        <TextBlock Grid.Row="2" Height="23" HorizontalAlignment="Left" Margin="211,7,0,0" Name="toleranciaTexBlock" Text="Tolerancia = " VerticalAlignment="Top" Width="175" />
+        <TextBlock Grid.Row="1" Height="467" HorizontalAlignment="Right" Margin="0,25,26,0" Name="FeedbackTexBlock" Text="Información" VerticalAlignment="Top" FontSize="16" MaxWidth="250" Width="250" MaxHeight="467" TextWrapping="WrapWithOverflow" />
+        <TextBlock Grid.Row="2" Height="23" HorizontalAlignment="Left" Margin="578,10,0,0" Name="repeticionesTexBlock" Text=" Rep" VerticalAlignment="Top" Width="37" />
+        <TextBlock Grid.Row="2" Height="23" HorizontalAlignment="Left" Margin="401,38,0,0" Name="repeticionesActualesTexBlock" Text=" Repeticiones Actuales = " VerticalAlignment="Top" Width="146" />
+        <TextBlock Grid.Row="2" Height="23" HorizontalAlignment="Left" Margin="703,10,0,0" Name="duracionTexBlock" Text="Duración Postura = " VerticalAlignment="Top" Width="175" />
+        <!-- Botones de control de repeticiones:-->
+        <Button Content="+1" Grid.Row="2" Height="23" HorizontalAlignment="Left" Margin="546,10,0,0" Name="AddRepeticionButton" VerticalAlignment="Top" Width="26" Click="AddRepeticion_Click" />
+        <Button Content="-1" Grid.Row="2" Height="23" HorizontalAlignment="Left" Margin="621,10,0,0" Name="SubRepeticionButton" VerticalAlignment="Top" Width="26" Click="SubRepeticion_Click" />
+        <Button Content="Establecer" Grid.Row="2" Height="23" HorizontalAlignment="Left" Margin="546,0,0,23" Name="SetRepeticionButton" VerticalAlignment="Bottom" Width="101" Click="SetRepeticion_Click" />
     </Grid>
 </Window>

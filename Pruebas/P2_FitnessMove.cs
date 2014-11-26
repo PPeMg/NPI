@@ -74,14 +74,34 @@ namespace Microsoft.Samples.Kinect.ColorBasics
             this.feedBack = "";
         }
 
-        public double getTolerancia() 
+        public double getTolerancia()
         {
-            return this.tolerancia; 
+            return this.tolerancia;
         }
 
         public void setTolerancia(double tol)
         {
             this.tolerancia = tol;
+        }
+
+        public int getDuracion()
+        {
+            return this.vecesNecesarias;
+        }
+
+        public void setDuracion(int veces)
+        {
+            this.vecesNecesarias = veces;
+        }
+
+        public int getRepeticiones()
+        {
+            return this.repeticiones;
+        }
+
+        public void setRepeticiones(int rep)
+        {
+            this.repeticiones = rep;
         }
 
         public String getFeedBack()
