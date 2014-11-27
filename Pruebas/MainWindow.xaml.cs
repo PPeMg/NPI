@@ -172,6 +172,9 @@
         /// <param name="e">event arguments</param>
         void kinectConectado_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
+            // Creamos un bool para comprobar si el movimiento está en tránsito:
+            bool transito = false;
+
             // Creamos un string para mostrar la tolerancia por pantalla:
             int tol = (int)(this.controlMovimiento.getTolerancia() * 100);
             string mensajeTol = "Tolerancia = " + tol + "%";
@@ -227,12 +230,17 @@
                             if (esq.TrackingState == SkeletonTrackingState.Tracked)
                             {
                                 // Si es correcto:
-                                if (controlMovimiento.movimientoRealizado(esq))
+                                if (controlMovimiento.movimientoRealizado(esq, ref transito))
                                     pintarEsqueleto(esq, Colors.Green, Colors.Yellow);
 
                                 // Si no lo es:
                                 else
-                                    pintarEsqueleto(esq, Colors.Red, Colors.SteelBlue);
+                                {
+                                    if(transito)
+                                        pintarEsqueleto(esq, Colors.Blue, Colors.Coral);
+                                    else
+                                        pintarEsqueleto(esq, Colors.Red, Colors.SteelBlue);
+                                }
                             }
                         }
                     }

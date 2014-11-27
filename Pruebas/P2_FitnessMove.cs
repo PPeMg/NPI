@@ -500,11 +500,71 @@ namespace Microsoft.Samples.Kinect.ColorBasics
         }
 
         /// <summary>
+        /// Método que comprueba si el brazo está en tránsito:
+        /// </summary>
+        /// <param name="Head">Cabeza del esqueleto </param>
+        /// <param name="Hip">Cadera del esqueleto </param>
+        /// <param name="Wrist">Muñeca del brazo que queremos comprobar </param>
+        private bool enTransito(Joint Head, Joint Wrist, Joint Hip)
+        {
+            bool retorno = false;
+
+            double topeCadera;
+            double topeCabeza;
+
+            if (Hip.Position.Y >= 0)
+            {
+                topeCadera = Hip.Position.Y * (1.0 + this.tolerancia);
+            }
+            else
+            {
+                topeCadera = Hip.Position.Y * (1.0 - this.tolerancia);
+            }
+
+            //Si está en tránsito, debe de estar siempre por encima de la cadera y al lado de la cabeza:
+            if (topeCadera < Wrist.Position.Y)
+            {
+                if (Wrist.JointType == JointType.WristLeft)
+                {
+                    if (Head.Position.X >= 0)
+                    {
+                        topeCabeza = Head.Position.X * (1.0 - this.tolerancia);
+                    }
+                    else
+                    {
+                        topeCabeza = Head.Position.X * (1.0 + this.tolerancia);
+                    }
+
+                    if(topeCabeza > Wrist.Position.X)
+                        retorno = true;
+                }
+                else
+                {
+                    if (Head.Position.X >= 0)
+                    {
+                        topeCabeza = Head.Position.X * (1.0 + this.tolerancia);
+                    }
+                    else
+                    {
+                        topeCabeza = Head.Position.X * (1.0 - this.tolerancia);
+                    }
+
+                    if(topeCabeza < Wrist.Position.X)
+                        retorno = true;
+                }
+            }
+                return retorno;
+        }
+
+        /// <summary>
         /// Método que comprueba la correcta realización del movimiento.
         /// </summary>
-        public bool movimientoRealizado(Skeleton esqueleto)
+        /// <param name="esqueleto"> Esqueleto sobre el que se trabaja </param>
+        /// <param name="transito"> Referencia a un booleano que almacenará true solo cuando haya algún miembro en tránsito </param>
+        public bool movimientoRealizado(Skeleton esqueleto, ref bool transito)
         {
             this.feedBack = "Información del Movimiento: \n";
+            transito = false;
 
             // El retorno será false a menos que indiquemos lo contrario. Esto se hará solo cuando se haya terminado correctamente el movimiento:
             bool terminadoCorrectamente = false;
@@ -559,11 +619,30 @@ namespace Microsoft.Samples.Kinect.ColorBasics
                             else
                                 this.feedBack += "\nPosición Estirado Izquierda: " + this.vecesCorrecta + "\n";
                         }
+
+                        // Si estamos en tránsito hacia la cabeza, lo indicamos:
+                        else if (this.enTransito(esqueleto.Joints[JointType.Head], esqueleto.Joints[JointType.WristRight], esqueleto.Joints[JointType.HipCenter]))
+                        {
+                            this.feedBack += "\nColoque la mano derecha sobre su cabeza.\nPara ello siga subiendo la mano derecha hacia ella.\n";
+                            this.vecesCorrecta = 0;
+                            transito = true;
+                        }
+
+
+                        // Si aún no hemos puesto la mano izquierda sobre la cabeza, reiniciamos el acumulador:
                         else
                         {
                             this.feedBack += "\nColoque la mano derecha sobre su cabeza.\n";
                             this.vecesCorrecta = 0;
                         }
+                    }
+                    
+                    // Si estamos en tránsito hacia la cadera, lo indicamos:
+                    else if (this.enTransito(esqueleto.Joints[JointType.Head], esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.HipCenter]))
+                    {
+                        this.feedBack += "\nColoque la mano izquierda apoyada en su cadera.\nPara ello siga bajando la mano izquierda hacia ella.\n";
+                        this.vecesCorrecta = 0;
+                        transito = true;
                     }
 
                     // Si aún no hemos alcanzado la posición de estiramiento, reiniciamos el acumulador:
@@ -595,6 +674,16 @@ namespace Microsoft.Samples.Kinect.ColorBasics
                             else
                                 this.feedBack += "\nPosición Estirado Derecha: " + this.vecesCorrecta + "\n";
                         }
+
+                        // Si estamos en tránsito hacia la cabeza, lo indicamos:
+                        else if (this.enTransito(esqueleto.Joints[JointType.Head], esqueleto.Joints[JointType.WristLeft], esqueleto.Joints[JointType.HipCenter]))
+                        {
+                            this.feedBack += "\nColoque la mano izquierda sobre su cabeza.\nPara ello siga subiendo la mano izquierda hacia ella.\n";
+                            this.vecesCorrecta = 0;
+                            transito = true;
+                        }
+
+                        // Si aún no hemos puesto la mano izquierda sobre la cabeza, reiniciamos el acumulador:
                         else
                         {
                             this.feedBack += "\nColoque la mano izquierda sobre su cabeza.\n";
@@ -602,6 +691,12 @@ namespace Microsoft.Samples.Kinect.ColorBasics
                         }
                     }
 
+                    // Si estamos en tránsito hacia la cadera, lo indicamos:
+                    else if (this.enTransito(esqueleto.Joints[JointType.Head], esqueleto.Joints[JointType.WristRight], esqueleto.Joints[JointType.HipCenter])){
+                        this.feedBack += "\nColoque la mano derecha apoyada en su cadera.\nPara ello siga bajando la mano derecha hacia ella.\n";
+                        this.vecesCorrecta = 0;
+                        transito = true;
+                    }
                     // Si aún no hemos alcanzado la posición de estiramiento, reiniciamos el acumulador:
                     else
                     {
