@@ -34,3 +34,15 @@ D:\GitHub Workspace\NPI\Pruebas\obj\Debug\ColorBasics-WPF_MarkupCompile.cache
 D:\GitHub Workspace\NPI\Pruebas\obj\Debug\ColorBasics-WPF.g.resources
 D:\GitHub Workspace\NPI\Pruebas\obj\Debug\Microsoft.Samples.Kinect.ColorBasics.Properties.Resources.resources
 D:\GitHub Workspace\NPI\Pruebas\obj\Debug\ColorBasics-WPF.csproj.GenerateResource.Cache
+D:\GitHub Workspace\NPI\P2_FitnessMove\obj\Debug\ColorBasics-WPF.exe
+D:\GitHub Workspace\NPI\P2_FitnessMove\obj\Debug\ColorBasics-WPF.pdb
+D:\GitHub Workspace\NPI\P2_FitnessMove\bin\Debug\ColorBasics-WPF.exe
+D:\GitHub Workspace\NPI\P2_FitnessMove\bin\Debug\ColorBasics-WPF.pdb
+D:\GitHub Workspace\NPI\P2_FitnessMove\obj\Debug\ColorBasics-WPF.csprojResolveAssemblyReference.cache
+D:\GitHub Workspace\NPI\P2_FitnessMove\obj\Debug\MainWindow.baml
+D:\GitHub Workspace\NPI\P2_FitnessMove\obj\Debug\MainWindow.g.cs
+D:\GitHub Workspace\NPI\P2_FitnessMove\obj\Debug\App.g.cs
+D:\GitHub Workspace\NPI\P2_FitnessMove\obj\Debug\ColorBasics-WPF_MarkupCompile.cache
+D:\GitHub Workspace\NPI\P2_FitnessMove\obj\Debug\ColorBasics-WPF.g.resources
+D:\GitHub Workspace\NPI\P2_FitnessMove\obj\Debug\Microsoft.Samples.Kinect.ColorBasics.Properties.Resources.resources
+D:\GitHub Workspace\NPI\P2_FitnessMove\obj\Debug\ColorBasics-WPF.csproj.GenerateResource.Cache
